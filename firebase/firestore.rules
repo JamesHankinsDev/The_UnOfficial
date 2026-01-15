@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /posts/{postId} {
+      // Anyone can read published posts
+      // Authenticated users with owner/writer role can read their own drafts
+      allow read: if resource.data.status == 'published' || 
+        (request.auth != null && 
+         resource.data.authorId == request.auth.uid &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['owner', 'writer']);
+
+      // Only owner/writer can create posts
+      allow create: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['owner', 'writer'];
+
+      // Owner can update/delete any post
+      // Writers can only update/delete their own posts
+      allow update, delete: if request.auth != null && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'owner' ||
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'writer' && 
+         resource.data.authorId == request.auth.uid)
+      );
+    }
+
+    match /users/{userId} {
+      // Anyone can read user profiles (for author info)
+      allow read: if true;
+      
+      // Users can create their own profile
+      allow create: if request.auth != null && request.auth.uid == userId;
+      
+      // Users can update their own profile (except role)
+      // Only owner can change roles
+      allow update: if request.auth != null && (
+        (request.auth.uid == userId && request.resource.data.role == resource.data.role) ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'owner'
+      );
+    }
+
+  }
+}
