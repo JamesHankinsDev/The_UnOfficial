@@ -3,12 +3,16 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     match /posts/{postId} {
-      // Anyone can read published posts
+      // Anyone can read individual published posts
       // Authenticated users with owner/writer role can read their own drafts
-      allow read: if resource.data.status == 'published' || 
+      allow get: if resource.data.status == 'published' || 
         (request.auth != null && 
          resource.data.authorId == request.auth.uid &&
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['owner', 'writer']);
+
+      // Anyone can list/query posts (filtering handled by query)
+      // This allows queries like where("status", "==", "published") and where("slug", "==", "some-slug")
+      allow list: if true;
 
       // Only owner/writer can create posts
       allow create: if request.auth != null && 

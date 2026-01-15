@@ -18,11 +18,11 @@ export default function PostCard({ post }: { post: any }) {
           {post.title}
         </h2>
       </Link>
-      
+
       <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">
         {post.excerpt}
       </p>
-      
+
       <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
         <div className="flex items-center gap-2">
           <span className="font-medium text-gray-900 dark:text-gray-100">
@@ -35,7 +35,7 @@ export default function PostCard({ post }: { post: any }) {
           </time>
         )}
       </div>
-      
+
       {post.tags && post.tags.length > 0 && (
         <div className="flex gap-2 mt-4 flex-wrap">
           {post.tags.slice(0, 3).map((tag: string, i: number) => (

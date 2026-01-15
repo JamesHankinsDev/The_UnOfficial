@@ -51,10 +51,14 @@ export default function PostsPage() {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-primary dark:text-tertiary mb-2">All Posts</h1>
-        <p className="text-gray-600 dark:text-gray-400">Explore our latest articles and insights</p>
+        <h1 className="text-4xl font-bold text-primary dark:text-tertiary mb-2">
+          All Posts
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400">
+          Explore our latest articles and insights
+        </p>
       </div>
-      
+
       <div className="mb-6">
         <input
           value={search}
@@ -63,10 +67,12 @@ export default function PostsPage() {
           className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-tertiary focus:border-transparent"
         />
       </div>
-      
+
       {tags.length > 0 && (
         <div className="mb-8">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Filter by tag:</p>
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            Filter by tag:
+          </p>
           <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setSelectedTag(null)}
@@ -101,7 +107,9 @@ export default function PostsPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-600 dark:text-gray-400">No posts found matching your criteria.</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            No posts found matching your criteria.
+          </p>
         </div>
       ) : (
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-2">

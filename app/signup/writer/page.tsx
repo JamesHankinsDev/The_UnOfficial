@@ -2,7 +2,10 @@
 import { useAuth } from "../../../components/AuthProvider";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { validateInviteCode, useInviteCode } from "../../../lib/firebase/invites";
+import {
+  validateInviteCode,
+  useInviteCode,
+} from "../../../lib/firebase/invites";
 import { doc, updateDoc } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase/client";
 import { signInWithGoogle } from "../../../lib/firebase/auth";
@@ -53,7 +56,11 @@ export default function WriterSignupPage() {
       });
 
       // Mark invite as used
-      await useInviteCode(invite.id!, user.uid, user.displayName || user.email || "Unknown");
+      await useInviteCode(
+        invite.id!,
+        user.uid,
+        user.displayName || user.email || "Unknown"
+      );
 
       setSuccess(true);
       setTimeout(() => {
@@ -91,7 +98,8 @@ export default function WriterSignupPage() {
           Invalid Link
         </h1>
         <p className="text-gray-700 dark:text-gray-300 mb-6">
-          No invite code was provided. Please use the complete invite link you received.
+          No invite code was provided. Please use the complete invite link you
+          received.
         </p>
         <button
           onClick={() => router.push("/")}
@@ -140,7 +148,8 @@ export default function WriterSignupPage() {
           Writer Invitation
         </h1>
         <p className="text-gray-700 dark:text-gray-300 mb-6">
-          You've been invited to join as a writer! Sign in with Google to accept your invitation and start creating content.
+          You've been invited to join as a writer! Sign in with Google to accept
+          your invitation and start creating content.
         </p>
         <button
           onClick={handleSignIn}
@@ -173,7 +182,9 @@ export default function WriterSignupPage() {
   if (validating) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-gray-600 dark:text-gray-400">Validating invite code...</p>
+        <p className="text-gray-600 dark:text-gray-400">
+          Validating invite code...
+        </p>
       </div>
     );
   }

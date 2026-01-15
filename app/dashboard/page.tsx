@@ -5,13 +5,21 @@ import { useEffect, useState } from "react";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import { firestore } from "../../lib/firebase/client";
 import type { Post } from "../../lib/firebase/posts";
-import { generateInviteCode, getInviteCodes, type InviteCode } from "../../lib/firebase/invites";
+import { updatePost } from "../../lib/firebase/posts";
+import {
+  generateInviteCode,
+  getInviteCodes,
+  type InviteCode,
+} from "../../lib/firebase/invites";
 
 export default function DashboardPage() {
   const { user, profile, loading, signOut } = useAuth();
   const router = useRouter();
   const [drafts, setDrafts] = useState<Post[]>([]);
   const [loadingDrafts, setLoadingDrafts] = useState(true);
+  const [publishedPosts, setPublishedPosts] = useState<Post[]>([]);
+  const [loadingPublished, setLoadingPublished] = useState(true);
+  const [unpublishing, setUnpublishing] = useState<string | null>(null);
   const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([]);
   const [loadingInvites, setLoadingInvites] = useState(false);
   const [generatingCode, setGeneratingCode] = useState(false);
@@ -57,6 +65,39 @@ export default function DashboardPage() {
   }, [user, profile, loading]);
 
   useEffect(() => {
+    async function loadPublished() {
+      if (!user || !firestore) {
+        setLoadingPublished(false);
+        return;
+      }
+
+      if (profile?.role && ["owner", "writer"].includes(profile.role)) {
+        try {
+          const q = query(
+            collection(firestore, "posts"),
+            where("authorId", "==", user.uid),
+            where("status", "==", "published"),
+            orderBy("publishedAt", "desc")
+          );
+          const snap = await getDocs(q);
+          const pubPosts = snap.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })) as Post[];
+          setPublishedPosts(pubPosts);
+        } catch (error) {
+          console.error("Error loading published posts:", error);
+        }
+      }
+      setLoadingPublished(false);
+    }
+
+    if (!loading && user) {
+      loadPublished();
+    }
+  }, [user, profile, loading]);
+
+  useEffect(() => {
     async function loadInvites() {
       if (!user || !firestore || profile?.role !== "owner") {
         return;
@@ -87,7 +128,7 @@ export default function DashboardPage() {
         user.uid,
         user.displayName || user.email || "Unknown"
       );
-      
+
       // Reload invite codes
       const codes = await getInviteCodes(user.uid);
       setInviteCodes(codes);
@@ -108,6 +149,33 @@ export default function DashboardPage() {
     navigator.clipboard.writeText(link);
     setCopiedCode(code);
     setTimeout(() => setCopiedCode(null), 2000);
+  };
+
+  const handleUnpublish = async (postId: string) => {
+    if (
+      !confirm(
+        "Unpublish this post? It will move back to drafts and be hidden from readers."
+      )
+    ) {
+      return;
+    }
+
+    setUnpublishing(postId);
+    try {
+      await updatePost(postId, { status: "draft" });
+
+      // Move post from published to drafts in state
+      const post = publishedPosts.find((p) => p.id === postId);
+      if (post) {
+        setPublishedPosts(publishedPosts.filter((p) => p.id !== postId));
+        setDrafts([{ ...post, status: "draft" }, ...drafts]);
+      }
+    } catch (error) {
+      console.error("Error unpublishing post:", error);
+      alert("Failed to unpublish post. Please try again.");
+    } finally {
+      setUnpublishing(null);
+    }
   };
 
   const handleSignOut = async () => {
@@ -284,6 +352,83 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* My Published Posts Section */}
+        {profile?.role && ["owner", "writer"].includes(profile.role) && (
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+            <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+              My Published Posts
+            </h3>
+            {loadingPublished ? (
+              <p className="text-gray-600 dark:text-gray-400">
+                Loading published posts...
+              </p>
+            ) : publishedPosts.length === 0 ? (
+              <p className="text-gray-600 dark:text-gray-400">
+                No published posts yet.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {publishedPosts.map((post) => (
+                  <div
+                    key={post.id}
+                    className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-tertiary transition-colors"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100">
+                            {post.title}
+                          </h4>
+                          <span className="px-2 py-0.5 bg-tertiary/20 text-tertiary text-xs rounded-full">
+                            Published
+                          </span>
+                        </div>
+                        {post.excerpt && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                            {post.excerpt}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-500">
+                          {post.tags && post.tags.length > 0 && (
+                            <span>Tags: {post.tags.join(", ")}</span>
+                          )}
+                          <span>
+                            Published:{" "}
+                            {new Date(
+                              post.publishedAt?.seconds * 1000 || Date.now()
+                            ).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="ml-4 flex gap-2">
+                        <a
+                          href={`/posts/${post.slug}`}
+                          className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        >
+                          View
+                        </a>
+                        <a
+                          href={`/posts/edit/${post.id}`}
+                          className="px-3 py-1 text-sm bg-tertiary text-primary rounded hover:bg-accent transition-colors"
+                        >
+                          Edit
+                        </a>
+                        <button
+                          onClick={() => handleUnpublish(post.id!)}
+                          disabled={unpublishing === post.id}
+                          className="px-3 py-1 text-sm bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {unpublishing === post.id ? "..." : "Unpublish"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Writer Invite Codes (Owner Only) */}
         {profile?.role === "owner" && (
           <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
@@ -314,7 +459,9 @@ export default function DashboardPage() {
             )}
 
             {loadingInvites ? (
-              <p className="text-gray-600 dark:text-gray-400">Loading invite codes...</p>
+              <p className="text-gray-600 dark:text-gray-400">
+                Loading invite codes...
+              </p>
             ) : inviteCodes.length === 0 ? (
               <p className="text-gray-600 dark:text-gray-400">
                 No invite codes yet. Generate one to invite writers.
@@ -349,12 +496,23 @@ export default function DashboardPage() {
                         <div className="text-sm text-gray-600 dark:text-gray-400">
                           {invite.usedBy ? (
                             <p>
-                              Used by <span className="font-medium">{invite.usedByName}</span> on{" "}
-                              {invite.usedAt && new Date(invite.usedAt.seconds * 1000).toLocaleDateString()}
+                              Used by{" "}
+                              <span className="font-medium">
+                                {invite.usedByName}
+                              </span>{" "}
+                              on{" "}
+                              {invite.usedAt &&
+                                new Date(
+                                  invite.usedAt.seconds * 1000
+                                ).toLocaleDateString()}
                             </p>
                           ) : (
                             <p>
-                              Created {invite.createdAt && new Date(invite.createdAt.seconds * 1000).toLocaleDateString()}
+                              Created{" "}
+                              {invite.createdAt &&
+                                new Date(
+                                  invite.createdAt.seconds * 1000
+                                ).toLocaleDateString()}
                             </p>
                           )}
                         </div>
@@ -364,7 +522,9 @@ export default function DashboardPage() {
                           onClick={() => copyInviteLink(invite.code)}
                           className="ml-4 px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                         >
-                          {copiedCode === invite.code ? "✓ Copied!" : "Copy Link"}
+                          {copiedCode === invite.code
+                            ? "✓ Copied!"
+                            : "Copy Link"}
                         </button>
                       )}
                     </div>

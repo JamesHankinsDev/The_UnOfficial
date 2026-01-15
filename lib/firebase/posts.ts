@@ -6,6 +6,9 @@ import {
   doc,
   serverTimestamp,
   getDoc,
+  getDocs,
+  query,
+  where,
 } from "firebase/firestore";
 import { firestore } from "./client";
 
@@ -71,4 +74,17 @@ export async function getPost(postId: string) {
   if (!snap.exists()) return null;
 
   return { id: snap.id, ...snap.data() } as Post;
+}
+
+export async function getPostBySlug(slug: string) {
+  if (!firestore) throw new Error("Firestore not initialized");
+
+  const postsRef = collection(firestore, "posts");
+  const q = query(postsRef, where("slug", "==", slug));
+  const snap = await getDocs(q);
+
+  if (snap.empty) return null;
+
+  const doc = snap.docs[0];
+  return { id: doc.id, ...doc.data() } as Post;
 }
