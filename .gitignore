@@ -52,3 +52,9 @@ ui-debug.log
 # Misc
 *.pem
 .cache/
+
+# Personal/Temporary Markdown files (keep README.md, DEPLOY.md, etc.)
+NOTES.md
+TODO.md
+*.local.md
+*PRIVATE*.md

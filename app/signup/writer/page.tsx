@@ -1,7 +1,7 @@
 "use client";
 import { useAuth } from "../../../components/AuthProvider";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import {
   validateInviteCode,
   useInviteCode,
@@ -10,7 +10,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { firestore } from "../../../lib/firebase/client";
 import { signInWithGoogle } from "../../../lib/firebase/auth";
 
-export default function WriterSignupPage() {
+function WriterSignupContent() {
   const { user, profile, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -207,4 +207,18 @@ export default function WriterSignupPage() {
   }
 
   return null;
+}
+
+export default function WriterSignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      }
+    >
+      <WriterSignupContent />
+    </Suspense>
+  );
 }
