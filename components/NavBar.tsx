@@ -27,6 +27,12 @@ export default function NavBar() {
           >
             Posts
           </a>
+          <a
+            href="/about"
+            className="text-sm text-gray-200 hover:text-tertiary transition-colors"
+          >
+            About
+          </a>
           {!loading && (
             <>
               {user ? (
