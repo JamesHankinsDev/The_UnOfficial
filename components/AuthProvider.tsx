@@ -45,29 +45,22 @@ function useProvideAuth(): AuthContextValue {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log("Auth effect running, auth:", auth);
-
     if (!auth) {
-      console.log("No auth instance, setting loading to false");
       setUser(null);
       setProfile(null);
       setLoading(false);
       return;
     }
 
-    console.log("Setting up onAuthStateChanged listener");
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
-      console.log("Auth state changed, user:", u?.email || "no user");
       setUser(u);
       setLoading(false); // Set loading false immediately after auth state is known
 
       // Fetch profile asynchronously without blocking
       if (u && firestore) {
-        console.log("Fetching user profile...");
         try {
           const ref = doc(firestore, "users", u.uid);
           const snap = await getDoc(ref);
-          console.log("Profile fetch complete, exists:", snap.exists());
           if (snap.exists()) {
             setProfile(snap.data() as Profile);
           } else {
