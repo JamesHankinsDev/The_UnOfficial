@@ -24,7 +24,7 @@ export async function signInWithGoogle() {
         email: user.email || null,
         displayName: user.displayName || null,
         photoURL: user.photoURL || null,
-        role: "owner", // First user gets owner role
+        role: "reader", // Default role for new users
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });

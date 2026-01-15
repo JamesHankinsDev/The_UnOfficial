@@ -5,12 +5,17 @@ import { useEffect, useState } from "react";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import { firestore } from "../../lib/firebase/client";
 import type { Post } from "../../lib/firebase/posts";
+import { generateInviteCode, getInviteCodes, type InviteCode } from "../../lib/firebase/invites";
 
 export default function DashboardPage() {
   const { user, profile, loading, signOut } = useAuth();
   const router = useRouter();
   const [drafts, setDrafts] = useState<Post[]>([]);
   const [loadingDrafts, setLoadingDrafts] = useState(true);
+  const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([]);
+  const [loadingInvites, setLoadingInvites] = useState(false);
+  const [generatingCode, setGeneratingCode] = useState(false);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -50,6 +55,60 @@ export default function DashboardPage() {
       loadDrafts();
     }
   }, [user, profile, loading]);
+
+  useEffect(() => {
+    async function loadInvites() {
+      if (!user || !firestore || profile?.role !== "owner") {
+        return;
+      }
+
+      setLoadingInvites(true);
+      try {
+        const codes = await getInviteCodes(user.uid);
+        setInviteCodes(codes);
+      } catch (error) {
+        console.error("Error loading invite codes:", error);
+      } finally {
+        setLoadingInvites(false);
+      }
+    }
+
+    if (!loading && user && profile?.role === "owner") {
+      loadInvites();
+    }
+  }, [user, profile, loading]);
+
+  const handleGenerateCode = async () => {
+    if (!user) return;
+
+    setGeneratingCode(true);
+    try {
+      const code = await generateInviteCode(
+        user.uid,
+        user.displayName || user.email || "Unknown"
+      );
+      
+      // Reload invite codes
+      const codes = await getInviteCodes(user.uid);
+      setInviteCodes(codes);
+
+      // Show success message
+      setCopiedCode(code);
+      setTimeout(() => setCopiedCode(null), 3000);
+    } catch (error) {
+      console.error("Error generating invite code:", error);
+      alert("Failed to generate invite code");
+    } finally {
+      setGeneratingCode(false);
+    }
+  };
+
+  const copyInviteLink = (code: string) => {
+    const link = `${window.location.origin}/signup/writer?code=${code}`;
+    navigator.clipboard.writeText(link);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -217,6 +276,97 @@ export default function DashboardPage() {
                       >
                         Edit
                       </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Writer Invite Codes (Owner Only) */}
+        {profile?.role === "owner" && (
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  Writer Invitations
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Generate invite links to add new writers to your blog
+                </p>
+              </div>
+              <button
+                onClick={handleGenerateCode}
+                disabled={generatingCode}
+                className="px-4 py-2 bg-tertiary text-primary font-medium rounded-lg hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {generatingCode ? "Generating..." : "Generate Code"}
+              </button>
+            </div>
+
+            {copiedCode && (
+              <div className="mb-4 p-3 bg-tertiary/20 border border-tertiary rounded-lg">
+                <p className="text-sm text-gray-900 dark:text-gray-100">
+                  ✓ Invite link copied to clipboard!
+                </p>
+              </div>
+            )}
+
+            {loadingInvites ? (
+              <p className="text-gray-600 dark:text-gray-400">Loading invite codes...</p>
+            ) : inviteCodes.length === 0 ? (
+              <p className="text-gray-600 dark:text-gray-400">
+                No invite codes yet. Generate one to invite writers.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {inviteCodes.map((invite) => (
+                  <div
+                    key={invite.id}
+                    className={`p-4 border rounded-lg ${
+                      invite.usedBy
+                        ? "border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50"
+                        : "border-tertiary bg-tertiary/5"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <code className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded font-mono text-sm">
+                            {invite.code}
+                          </code>
+                          {invite.usedBy ? (
+                            <span className="px-2 py-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded text-xs">
+                              Used
+                            </span>
+                          ) : (
+                            <span className="px-2 py-1 bg-tertiary text-primary rounded text-xs font-medium">
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          {invite.usedBy ? (
+                            <p>
+                              Used by <span className="font-medium">{invite.usedByName}</span> on{" "}
+                              {invite.usedAt && new Date(invite.usedAt.seconds * 1000).toLocaleDateString()}
+                            </p>
+                          ) : (
+                            <p>
+                              Created {invite.createdAt && new Date(invite.createdAt.seconds * 1000).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      {!invite.usedBy && (
+                        <button
+                          onClick={() => copyInviteLink(invite.code)}
+                          className="ml-4 px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                        >
+                          {copiedCode === invite.code ? "✓ Copied!" : "Copy Link"}
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}

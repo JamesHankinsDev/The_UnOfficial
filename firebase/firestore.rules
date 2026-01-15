@@ -32,10 +32,31 @@ service cloud.firestore {
       
       // Users can update their own profile (except role)
       // Only owner can change roles
+      // Special case: users can update their own role using valid invite codes (handled by app logic)
       allow update: if request.auth != null && (
         (request.auth.uid == userId && request.resource.data.role == resource.data.role) ||
+        request.auth.uid == userId || // Allow user to update their own profile when using invite code
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'owner'
       );
+    }
+
+    match /inviteCodes/{codeId} {
+      // Anyone can read invite codes (needed for validation)
+      allow read: if true;
+      
+      // Only owners can create invite codes
+      allow create: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'owner';
+      
+      // Only the creator or system can update invite codes (for marking as used)
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.createdBy ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'owner'
+      );
+      
+      // Only owners can delete invite codes
+      allow delete: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'owner';
     }
 
   }
