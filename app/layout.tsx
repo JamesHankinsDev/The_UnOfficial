@@ -2,6 +2,7 @@ import "../styles/globals.css";
 import NavBar from "../components/NavBar";
 import ThemeToggle from "../components/ThemeToggle";
 import AuthProvider from "../components/AuthProvider";
+import IntroAnimation from "../components/IntroAnimation";
 
 export const metadata = {
   title: "The UnOfficial",
@@ -33,6 +34,7 @@ export default function RootLayout({
       </head>
       <body className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
         <AuthProvider>
+          <IntroAnimation />
           <div className="min-h-screen flex flex-col">
             <NavBar />
             <main className="flex-1 container mx-auto px-4 py-8">
