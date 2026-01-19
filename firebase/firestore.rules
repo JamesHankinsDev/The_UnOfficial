@@ -4,10 +4,9 @@ service cloud.firestore {
 
     match /posts/{postId} {
       // Anyone can read individual published posts
-      // Authenticated users with owner/writer role can read their own drafts
+      // Authenticated users with owner/writer role can read any draft
       allow get: if resource.data.status == 'published' || 
         (request.auth != null && 
-         resource.data.authorId == request.auth.uid &&
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['owner', 'writer']);
 
       // Anyone can list/query posts (filtering handled by query)
@@ -24,6 +23,22 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'owner' ||
         (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'writer' && 
          resource.data.authorId == request.auth.uid)
+      );
+    }
+
+    match /comments/{commentId} {
+      // Writers and owners can read all comments
+      allow read: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['owner', 'writer'];
+      
+      // Writers and owners can create comments
+      allow create: if request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['owner', 'writer'];
+      
+      // Only the comment author or owner can delete comments
+      allow delete: if request.auth != null && (
+        request.auth.uid == resource.data.userId ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'owner'
       );
     }
 

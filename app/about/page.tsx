@@ -109,30 +109,6 @@ export default function AboutPage() {
             If you're looking for the perfect take, you might want a network show. If you're looking 
             for smart, fun, optimistic NBA writing that sounds like your group chat? Welcome home.
           </p>
-
-          <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-            <h3 className="text-xl font-semibold text-primary dark:text-tertiary mb-4">
-              Join the Conversation
-            </h3>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-              Passionate about hoops and have something to say? We're always looking for writers 
-              who bring the same energy we do. Sign up and let's talk ball.
-            </p>
-            <div className="flex gap-4">
-              <a
-                href="/posts"
-                className="px-6 py-3 bg-tertiary text-primary font-medium rounded-lg hover:bg-accent transition-colors inline-block"
-              >
-                Read Articles
-              </a>
-              <a
-                href="/signin"
-                className="px-6 py-3 border-2 border-tertiary text-tertiary dark:text-tertiary font-medium rounded-lg hover:bg-tertiary hover:text-primary transition-colors inline-block"
-              >
-                Sign In
-              </a>
-            </div>
-          </div>
         </div>
       </div>
     </div>

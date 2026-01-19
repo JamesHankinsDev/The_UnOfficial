@@ -1,6 +1,7 @@
 import "../styles/globals.css";
 import NavBar from "../components/NavBar";
 import ThemeToggle from "../components/ThemeToggle";
+import Footer from "../components/Footer";
 import AuthProvider from "../components/AuthProvider";
 import IntroAnimation from "../components/IntroAnimation";
 
@@ -40,6 +41,7 @@ export default function RootLayout({
             <main className="flex-1 container mx-auto px-4 py-8">
               {children}
             </main>
+            <Footer />
             <ThemeToggle />
           </div>
         </AuthProvider>

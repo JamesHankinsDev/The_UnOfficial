@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import { firestore } from "../../lib/firebase/client";
 import type { Post } from "../../lib/firebase/posts";
-import { updatePost } from "../../lib/firebase/posts";
+import { updatePost, getAllDrafts } from "../../lib/firebase/posts";
 import {
   generateInviteCode,
   getInviteCodes,
@@ -17,6 +17,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const [drafts, setDrafts] = useState<Post[]>([]);
   const [loadingDrafts, setLoadingDrafts] = useState(true);
+  const [allDrafts, setAllDrafts] = useState<Post[]>([]);
+  const [loadingAllDrafts, setLoadingAllDrafts] = useState(true);
   const [publishedPosts, setPublishedPosts] = useState<Post[]>([]);
   const [loadingPublished, setLoadingPublished] = useState(true);
   const [unpublishing, setUnpublishing] = useState<string | null>(null);
@@ -61,6 +63,33 @@ export default function DashboardPage() {
 
     if (!loading && user) {
       loadDrafts();
+    }
+  }, [user, profile, loading]);
+
+  useEffect(() => {
+    async function loadAllDrafts() {
+      if (!user || !firestore) {
+        setLoadingAllDrafts(false);
+        return;
+      }
+
+      if (profile?.role && ["owner", "writer"].includes(profile.role)) {
+        try {
+          const allDraftPosts = await getAllDrafts();
+          // Filter out user's own drafts
+          const othersDrafts = allDraftPosts.filter(
+            (draft) => draft.authorId !== user.uid
+          );
+          setAllDrafts(othersDrafts);
+        } catch (error) {
+          console.error("Error loading all drafts:", error);
+        }
+      }
+      setLoadingAllDrafts(false);
+    }
+
+    if (!loading && user) {
+      loadAllDrafts();
     }
   }, [user, profile, loading]);
 
@@ -197,32 +226,32 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-primary dark:text-tertiary">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 md:p-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary dark:text-tertiary">
             Dashboard
           </h1>
           <button
             onClick={handleSignOut}
-            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm whitespace-nowrap"
           >
             Sign Out
           </button>
         </div>
 
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:flex-col sm:flex-row items-start sm:items-center gap-4 mb-8">
           {user.photoURL && (
             <img
               src={user.photoURL}
               alt="Profile"
-              className="w-20 h-20 rounded-full border-4 border-tertiary"
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-tertiary"
             />
           )}
-          <div>
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-gray-100 truncate">
               {user.displayName || "User"}
             </h2>
-            <p className="text-gray-600 dark:text-gray-400">{user.email}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{user.email}</p>
             {profile?.role && (
               <span
                 className={`inline-block mt-2 px-3 py-1 text-sm font-medium rounded-full ${
@@ -238,10 +267,10 @@ export default function DashboardPage() {
         </div>
 
         <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-          <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+          <h3 className="text-lg sm:text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
             Quick Actions
           </h3>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
             <a
               href="/posts"
               className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg hover:border-tertiary dark:hover:border-tertiary transition-colors"
@@ -301,12 +330,16 @@ export default function DashboardPage() {
               </p>
             ) : drafts.length === 0 ? (
               <p className="text-gray-600 dark:text-gray-400">
-                No drafts yet.{" "}
+                {publishedPosts.length > 0
+                  ? "No drafts currently. "
+                  : "No drafts yet. "}
                 <a
                   href="/posts/create"
                   className="text-tertiary hover:underline"
                 >
-                  Create your first post
+                  {publishedPosts.length > 0
+                    ? "Create a new post"
+                    : "Create your first post"}
                 </a>
               </p>
             ) : (
@@ -314,11 +347,11 @@ export default function DashboardPage() {
                 {drafts.map((draft) => (
                   <div
                     key={draft.id}
-                    className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-tertiary transition-colors"
+                    className="p-3 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-tertiary transition-colors"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 break-words">
                           {draft.title}
                         </h4>
                         {draft.excerpt && (
@@ -352,6 +385,83 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Team Drafts Review Section */}
+        {profile?.role && ["owner", "writer"].includes(profile.role) && (
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+            <div className="mb-4">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                Team Drafts - Review & Collaborate
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                View, comment on, and edit drafts from other writers
+              </p>
+            </div>
+            {loadingAllDrafts ? (
+              <p className="text-gray-600 dark:text-gray-400">
+                Loading team drafts...
+              </p>
+            ) : allDrafts.length === 0 ? (
+              <p className="text-gray-600 dark:text-gray-400">
+                No drafts from other team members.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {allDrafts.map((draft) => (
+                  <div
+                    key={draft.id}
+                    className="p-3 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-tertiary transition-colors"
+                  >
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100">
+                            {draft.title}
+                          </h4>
+                          <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded-full">
+                            by {draft.authorName}
+                          </span>
+                        </div>
+                        {draft.excerpt && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                            {draft.excerpt}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-500">
+                          {draft.tags && draft.tags.length > 0 && (
+                            <span>Tags: {draft.tags.join(", ")}</span>
+                          )}
+                          <span>
+                            Updated:{" "}
+                            {new Date(
+                              draft.updatedAt?.seconds * 1000 || Date.now()
+                            ).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="ml-4 flex gap-2">
+                        <a
+                          href={`/posts/review/${draft.id}`}
+                          className="px-3 py-1 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                        >
+                          Review
+                        </a>
+                        {profile?.role === "owner" && (
+                          <a
+                            href={`/posts/edit/${draft.id}`}
+                            className="px-3 py-1 text-sm bg-tertiary text-primary rounded hover:bg-accent transition-colors"
+                          >
+                            Edit
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* My Published Posts Section */}
         {profile?.role && ["owner", "writer"].includes(profile.role) && (
           <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
@@ -371,15 +481,15 @@ export default function DashboardPage() {
                 {publishedPosts.map((post) => (
                   <div
                     key={post.id}
-                    className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-tertiary transition-colors"
+                    className="p-3 sm:p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-tertiary transition-colors"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-semibold text-gray-900 dark:text-gray-100">
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 break-words">
                             {post.title}
                           </h4>
-                          <span className="px-2 py-0.5 bg-tertiary/20 text-tertiary text-xs rounded-full">
+                          <span className="px-2 py-0.5 bg-tertiary/20 text-tertiary text-xs rounded-full whitespace-nowrap">
                             Published
                           </span>
                         </div>
@@ -388,7 +498,7 @@ export default function DashboardPage() {
                             {post.excerpt}
                           </p>
                         )}
-                        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-500">
+                        <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-gray-500">
                           {post.tags && post.tags.length > 0 && (
                             <span>Tags: {post.tags.join(", ")}</span>
                           )}
@@ -400,23 +510,23 @@ export default function DashboardPage() {
                           </span>
                         </div>
                       </div>
-                      <div className="ml-4 flex gap-2">
+                      <div className="flex sm:flex-col gap-2 w-full sm:w-auto">
                         <a
                           href={`/posts/${post.slug}`}
-                          className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                          className="flex-1 sm:flex-none px-3 py-1 text-sm text-center bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors whitespace-nowrap"
                         >
                           View
                         </a>
                         <a
                           href={`/posts/edit/${post.id}`}
-                          className="px-3 py-1 text-sm bg-tertiary text-primary rounded hover:bg-accent transition-colors"
+                          className="flex-1 sm:flex-none px-3 py-1 text-sm text-center bg-tertiary text-primary rounded hover:bg-accent transition-colors whitespace-nowrap"
                         >
                           Edit
                         </a>
                         <button
                           onClick={() => handleUnpublish(post.id!)}
                           disabled={unpublishing === post.id}
-                          className="px-3 py-1 text-sm bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="flex-1 sm:flex-none px-3 py-1 text-sm bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                         >
                           {unpublishing === post.id ? "..." : "Unpublish"}
                         </button>
@@ -432,19 +542,19 @@ export default function DashboardPage() {
         {/* Writer Invite Codes (Owner Only) */}
         {profile?.role === "owner" && (
           <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">
                   Writer Invitations
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
                   Generate invite links to add new writers to your blog
                 </p>
               </div>
               <button
                 onClick={handleGenerateCode}
                 disabled={generatingCode}
-                className="px-4 py-2 bg-tertiary text-primary font-medium rounded-lg hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-4 py-2 bg-tertiary text-primary font-medium rounded-lg hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
               >
                 {generatingCode ? "Generating..." : "Generate Code"}
               </button>

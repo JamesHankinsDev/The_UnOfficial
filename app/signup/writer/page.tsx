@@ -41,6 +41,15 @@ function WriterSignupContent() {
     setError("");
 
     try {
+      // Check if user is already a writer or owner
+      if (profile?.role === "writer" || profile?.role === "owner") {
+        setError(
+          `You are already ${profile.role === "owner" ? "an owner" : "a writer"}. No need to use an invite code.`
+        );
+        setValidating(false);
+        return;
+      }
+
       const invite = await validateInviteCode(code);
 
       if (!invite) {

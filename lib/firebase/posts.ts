@@ -9,6 +9,7 @@ import {
   getDocs,
   query,
   where,
+  orderBy,
 } from "firebase/firestore";
 import { firestore } from "./client";
 
@@ -29,6 +30,16 @@ export type Post = {
   publishedAt?: any;
   createdAt?: any;
   updatedAt?: any;
+};
+
+export type Comment = {
+  id?: string;
+  postId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  content: string;
+  createdAt?: any;
 };
 
 export async function createPost(
@@ -87,4 +98,54 @@ export async function getPostBySlug(slug: string) {
 
   const doc = snap.docs[0];
   return { id: doc.id, ...doc.data() } as Post;
+}
+
+export async function getAllDrafts() {
+  if (!firestore) throw new Error("Firestore not initialized");
+
+  const postsRef = collection(firestore, "posts");
+  const q = query(
+    postsRef,
+    where("status", "==", "draft"),
+    orderBy("updatedAt", "desc")
+  );
+  const snap = await getDocs(q);
+
+  return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Post));
+}
+
+export async function addComment(
+  postId: string,
+  userId: string,
+  userName: string,
+  userEmail: string,
+  content: string
+) {
+  if (!firestore) throw new Error("Firestore not initialized");
+
+  const commentsRef = collection(firestore, "comments");
+  const docRef = await addDoc(commentsRef, {
+    postId,
+    userId,
+    userName,
+    userEmail,
+    content,
+    createdAt: serverTimestamp(),
+  });
+
+  return docRef.id;
+}
+
+export async function getComments(postId: string) {
+  if (!firestore) throw new Error("Firestore not initialized");
+
+  const commentsRef = collection(firestore, "comments");
+  const q = query(
+    commentsRef,
+    where("postId", "==", postId),
+    orderBy("createdAt", "asc")
+  );
+  const snap = await getDocs(q);
+
+  return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Comment));
 }

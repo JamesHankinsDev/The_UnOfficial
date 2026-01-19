@@ -46,7 +46,7 @@ export default function EditPostPage() {
           return;
         }
 
-        // Check permissions
+        // Check permissions - only author or owner can edit
         if (postData.authorId !== user?.uid && profile?.role !== "owner") {
           alert("You don't have permission to edit this post");
           router.push("/dashboard");
