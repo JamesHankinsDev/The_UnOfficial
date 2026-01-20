@@ -18,6 +18,7 @@ export default function EditPostPage() {
   const postId = params.id as string;
 
   const [saving, setSaving] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [loadingPost, setLoadingPost] = useState(true);
   const [post, setPost] = useState<Post | null>(null);
@@ -75,6 +76,38 @@ export default function EditPostPage() {
     }
   }, [user, profile, loading, postId, router]);
 
+  const handleGenerateExcerpt = async () => {
+    if (!formData.title || !formData.content) {
+      alert("Please enter a title and content first");
+      return;
+    }
+
+    setGenerating(true);
+    try {
+      const response = await fetch("/api/generate-excerpt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: formData.title,
+          content: formData.content,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate excerpt");
+      }
+
+      setFormData({ ...formData, excerpt: data.excerpt });
+    } catch (error: any) {
+      console.error("Error generating excerpt:", error);
+      alert(`Failed to generate excerpt: ${error.message}`);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !formData.title || !formData.content) return;
@@ -105,7 +138,7 @@ export default function EditPostPage() {
   const handleDelete = async () => {
     if (
       !confirm(
-        "Are you sure you want to delete this post? This action cannot be undone."
+        "Are you sure you want to delete this post? This action cannot be undone.",
       )
     ) {
       return;
@@ -203,15 +236,49 @@ export default function EditPostPage() {
               <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
                 Excerpt
               </label>
-              <textarea
-                value={formData.excerpt}
-                onChange={(e) =>
-                  setFormData({ ...formData, excerpt: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-tertiary focus:border-transparent"
-                rows={2}
-                placeholder="Brief description (optional, will auto-generate from content)"
-              />
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <textarea
+                    value={formData.excerpt}
+                    onChange={(e) =>
+                      setFormData({ ...formData, excerpt: e.target.value })
+                    }
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-tertiary focus:border-transparent"
+                    rows={3}
+                    placeholder="Brief description (optional)"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleGenerateExcerpt}
+                  disabled={generating || !formData.title || !formData.content}
+                  className="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-medium rounded-lg hover:from-purple-600 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <svg
+                    className={`w-4 h-4 ${generating ? "animate-spin" : ""}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    {generating ? (
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
+                    ) : (
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      />
+                    )}
+                  </svg>
+                  {generating ? "Generating..." : "✨ AI Generate Excerpt"}
+                </button>
+              </div>
             </div>
 
             <div>

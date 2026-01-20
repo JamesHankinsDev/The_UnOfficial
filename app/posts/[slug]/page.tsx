@@ -89,11 +89,6 @@ export default function PostDetail({
         <h1 className="text-4xl md:text-5xl font-bold text-primary dark:text-tertiary mb-4">
           {post.title}
         </h1>
-        {post.excerpt && (
-          <p className="text-xl text-gray-600 dark:text-gray-400 mb-4 italic">
-            {post.excerpt}
-          </p>
-        )}
         <div className="flex items-center gap-4 text-gray-600 dark:text-gray-400">
           <span className="font-medium text-gray-900 dark:text-gray-100">
             By {post.authorName}
