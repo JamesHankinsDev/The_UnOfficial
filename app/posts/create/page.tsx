@@ -2,6 +2,7 @@
 import { useAuth } from "../../../components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 import { createPost } from "../../../lib/firebase/posts";
 import { slugify } from "../../../lib/utils";
 
@@ -33,7 +34,7 @@ export default function CreatePostPage() {
   }, [user, profile, loading, router]);
   const handleGenerateExcerpt = async () => {
     if (!formData.title || !formData.content) {
-      alert("Please enter a title and content first");
+      toast.error("Please enter a title and content first");
       return;
     }
 
@@ -57,7 +58,7 @@ export default function CreatePostPage() {
       setFormData({ ...formData, excerpt: data.excerpt });
     } catch (error: any) {
       console.error("Error generating excerpt:", error);
-      alert(`Failed to generate excerpt: ${error.message}`);
+      toast.error(`Failed to generate excerpt: ${error.message}`);
     } finally {
       setGenerating(false);
     }
@@ -68,9 +69,10 @@ export default function CreatePostPage() {
 
     setSaving(true);
     try {
+      const slug = slugify(formData.title);
       const postId = await createPost({
         title: formData.title,
-        slug: slugify(formData.title),
+        slug,
         content: formData.content,
         excerpt: formData.excerpt || formData.content.substring(0, 160) + "...",
         authorId: user.uid,
@@ -82,11 +84,29 @@ export default function CreatePostPage() {
           : [],
       });
 
-      alert("Post created successfully!");
-      router.push(`/posts/${slugify(formData.title)}`);
+      // If publishing (not draft), send notifications to subscribers
+      if (formData.status === "published") {
+        try {
+          await fetch("/api/notify-subscribers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              postTitle: formData.title,
+              postSlug: slug,
+              authorName: user.displayName || "Anonymous",
+            }),
+          });
+        } catch (notifyError) {
+          console.error("Error sending notifications:", notifyError);
+          // Don't block post creation if notifications fail
+        }
+      }
+
+      toast.success("Post created successfully!");
+      router.push(`/posts/${slug}`);
     } catch (error) {
       console.error("Error creating post:", error);
-      alert("Failed to create post. Please try again.");
+      toast.error("Failed to create post. Please try again.");
     } finally {
       setSaving(false);
     }

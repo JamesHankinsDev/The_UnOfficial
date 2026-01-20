@@ -114,9 +114,13 @@ export default function EditPostPage() {
 
     setSaving(true);
     try {
+      const slug = slugify(formData.title);
+      const wasPublished = post?.status === "published";
+      const isNowPublished = formData.status === "published";
+
       await updatePost(postId, {
         title: formData.title,
-        slug: slugify(formData.title),
+        slug,
         content: formData.content,
         excerpt: formData.excerpt || formData.content.substring(0, 160) + "...",
         status: formData.status,
@@ -124,6 +128,24 @@ export default function EditPostPage() {
           ? formData.tags.split(",").map((t) => t.trim())
           : [],
       });
+
+      // If changing from draft/archived to published, send notifications
+      if (!wasPublished && isNowPublished) {
+        try {
+          await fetch("/api/notify-subscribers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              postTitle: formData.title,
+              postSlug: slug,
+              authorName: user.displayName || "Anonymous",
+            }),
+          });
+        } catch (notifyError) {
+          console.error("Error sending notifications:", notifyError);
+          // Don't block post update if notifications fail
+        }
+      }
 
       alert("Post updated successfully!");
       router.push("/dashboard");

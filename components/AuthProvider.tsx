@@ -7,6 +7,7 @@ import {
   signOut as _signOut,
 } from "../lib/firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
+import type { NotificationPreferences } from "../lib/firebase/users";
 
 type Profile = {
   uid: string;
@@ -14,6 +15,7 @@ type Profile = {
   displayName?: string;
   photoURL?: string;
   role?: "owner" | "admin" | "writer" | "reader";
+  notificationPreferences?: NotificationPreferences;
 };
 
 type AuthContextValue = {

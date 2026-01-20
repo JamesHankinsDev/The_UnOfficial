@@ -1,17 +1,56 @@
 "use client";
 import { useAuth } from "../../components/AuthProvider";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
+import {
+  updateNotificationPreferences,
+  type NotificationPreferences,
+} from "../../lib/firebase/users";
 
 export default function SettingsPage() {
   const { user, profile, loading } = useAuth();
   const router = useRouter();
+  const [saving, setSaving] = useState(false);
+  const [notificationPrefs, setNotificationPrefs] =
+    useState<NotificationPreferences>({
+      emailNotifications: false,
+      smsNotifications: false,
+      phoneNumber: "",
+    });
 
   useEffect(() => {
     if (!loading && !user) {
       router.push("/signin");
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (profile?.notificationPreferences) {
+      setNotificationPrefs(profile.notificationPreferences);
+    }
+  }, [profile]);
+
+  const handleSaveNotifications = async () => {
+    if (!user) return;
+
+    // Validate phone number if SMS is enabled
+    if (notificationPrefs.smsNotifications && !notificationPrefs.phoneNumber) {
+      toast.error("Please enter a phone number for SMS notifications");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await updateNotificationPreferences(user.uid, notificationPrefs);
+      toast.success("Notification preferences saved successfully!");
+    } catch (error) {
+      console.error("Error saving preferences:", error);
+      toast.error("Failed to save preferences. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -96,6 +135,108 @@ export default function SettingsPage() {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Notification Preferences Section */}
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-8 mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            Notification Preferences
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+            Get notified when new articles are published
+          </p>
+          <div className="space-y-6">
+            {/* Email Notifications */}
+            <div className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <input
+                type="checkbox"
+                id="emailNotifications"
+                checked={notificationPrefs.emailNotifications}
+                onChange={(e) =>
+                  setNotificationPrefs({
+                    ...notificationPrefs,
+                    emailNotifications: e.target.checked,
+                  })
+                }
+                className="mt-1 h-5 w-5 text-tertiary focus:ring-tertiary border-gray-300 rounded"
+              />
+              <div className="flex-1">
+                <label
+                  htmlFor="emailNotifications"
+                  className="block font-medium text-gray-900 dark:text-gray-100 cursor-pointer"
+                >
+                  Email Notifications
+                </label>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Receive email alerts when an author publishes a new article.
+                  Emails will be sent to: <strong>{user.email}</strong>
+                </p>
+              </div>
+            </div>
+
+            {/* SMS Notifications */}
+            <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="flex items-start gap-4 mb-4">
+                <input
+                  type="checkbox"
+                  id="smsNotifications"
+                  checked={notificationPrefs.smsNotifications}
+                  onChange={(e) =>
+                    setNotificationPrefs({
+                      ...notificationPrefs,
+                      smsNotifications: e.target.checked,
+                    })
+                  }
+                  className="mt-1 h-5 w-5 text-tertiary focus:ring-tertiary border-gray-300 rounded"
+                />
+                <div className="flex-1">
+                  <label
+                    htmlFor="smsNotifications"
+                    className="block font-medium text-gray-900 dark:text-gray-100 cursor-pointer"
+                  >
+                    SMS Notifications
+                  </label>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    Receive text message alerts for new articles
+                  </p>
+                </div>
+              </div>
+              {notificationPrefs.smsNotifications && (
+                <div className="ml-9">
+                  <label
+                    htmlFor="phoneNumber"
+                    className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2"
+                  >
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    id="phoneNumber"
+                    value={notificationPrefs.phoneNumber || ""}
+                    onChange={(e) =>
+                      setNotificationPrefs({
+                        ...notificationPrefs,
+                        phoneNumber: e.target.value,
+                      })
+                    }
+                    placeholder="+1234567890"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-tertiary focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Include country code (e.g., +1 for US)
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={handleSaveNotifications}
+              disabled={saving}
+              className="px-6 py-2 bg-tertiary text-primary font-medium rounded-lg hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {saving ? "Saving..." : "Save Notification Preferences"}
+            </button>
           </div>
         </div>
 
