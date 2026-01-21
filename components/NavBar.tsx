@@ -33,6 +33,12 @@ export default function NavBar() {
           >
             About
           </a>
+          <a
+            href="/merch"
+            className="text-sm text-gray-200 hover:text-tertiary transition-colors"
+          >
+            Merch
+          </a>
           {!loading && (
             <>
               {user ? (
