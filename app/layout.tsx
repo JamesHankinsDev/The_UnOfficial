@@ -35,6 +35,16 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* Plausible Analytics */}
+        <script async src="https://plausible.io/js/pa--jHguBzxvrmKAgSeGgtcb.js"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+              plausible.init();
+            `,
+          }}
+        />
       </head>
       <body className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
         <AuthProvider>
