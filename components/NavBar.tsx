@@ -2,6 +2,13 @@
 import { useAuth } from "./AuthProvider";
 import { useRouter } from "next/navigation";
 import Logo from "./Logo";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
+import Link from "next/link";
 
 export default function NavBar() {
   const { user, loading, signOut } = useAuth();
@@ -13,62 +20,92 @@ export default function NavBar() {
   };
 
   return (
-    <nav className="bg-primary dark:bg-gray-800 border-b border-secondary dark:border-accent">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <a href="/" className="flex items-center">
+    <AppBar
+      position="static"
+      color="primary"
+      elevation={0}
+      sx={{ borderBottom: 1, borderColor: "secondary.main" }}
+    >
+      <Toolbar sx={{ justifyContent: "space-between", px: { xs: 1, sm: 4 } }}>
+        <Box display="flex" alignItems="center" gap={2}>
+          <Link href="/" style={{ display: "flex", alignItems: "center" }}>
             <Logo className="h-12 w-auto" />
-          </a>
-        </div>
-        <div className="flex items-center gap-4">
-          <a
+          </Link>
+        </Box>
+        <Box display="flex" alignItems="center" gap={2}>
+          <Button
+            component={Link}
             href="/posts"
-            className="text-sm text-gray-200 hover:text-tertiary transition-colors"
+            color="inherit"
+            sx={{ textTransform: "none" }}
           >
             Posts
-          </a>
-          <a
+          </Button>
+          <Button
+            component={Link}
             href="/about"
-            className="text-sm text-gray-200 hover:text-tertiary transition-colors"
+            color="inherit"
+            sx={{ textTransform: "none" }}
           >
             About
-          </a>
-          <a
+          </Button>
+          <Button
+            component={Link}
             href="/merch"
-            className="text-sm text-gray-200 hover:text-tertiary transition-colors"
+            color="inherit"
+            sx={{ textTransform: "none" }}
           >
             Merch
-          </a>
-          {!loading && (
-            <>
-              {user ? (
-                <a
-                  href="/dashboard"
-                  className="flex items-center gap-2 ml-2 pl-2 border-l border-gray-600 hover:opacity-80 transition-opacity cursor-pointer"
-                >
-                  {user.photoURL && (
-                    <img
+          </Button>
+          {!loading &&
+            (user ? (
+              <Button
+                component={Link}
+                href="/dashboard"
+                color="inherit"
+                startIcon={
+                  user.photoURL ? (
+                    <Avatar
                       src={user.photoURL}
                       alt="Profile"
-                      className="w-8 h-8 rounded-full border-2 border-tertiary"
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        border: "2px solid",
+                        borderColor: "success.main",
+                      }}
                     />
-                  )}
-                  <span className="text-sm text-white hidden sm:inline">
-                    {user.displayName?.split(" ")[0] || "User"}
-                  </span>
-                </a>
-              ) : (
-                <a
-                  href="/signin"
-                  className="px-3 py-1 bg-tertiary text-primary font-medium rounded hover:bg-accent transition-colors"
+                  ) : null
+                }
+                sx={{
+                  ml: 2,
+                  pl: 2,
+                  borderLeft: 1,
+                  borderColor: "divider",
+                  textTransform: "none",
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  color="inherit"
+                  sx={{ display: { xs: "none", sm: "inline" } }}
                 >
-                  Sign in
-                </a>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-    </nav>
+                  {user.displayName?.split(" ")[0] || "User"}
+                </Typography>
+              </Button>
+            ) : (
+              <Button
+                component={Link}
+                href="/signin"
+                variant="contained"
+                color="success"
+                sx={{ textTransform: "none", fontWeight: 500 }}
+              >
+                Sign in
+              </Button>
+            ))}
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 }

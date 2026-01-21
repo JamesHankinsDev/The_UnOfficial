@@ -2,6 +2,7 @@
 import { useAuth } from "../../../../components/AuthProvider";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSnackbar } from "../../../../components/MuiSnackbar";
 import {
   getPost,
   updatePost,
@@ -16,6 +17,8 @@ export default function EditPostPage() {
   const router = useRouter();
   const params = useParams();
   const postId = params.id as string;
+
+  const { showMessage } = useSnackbar();
 
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -42,14 +45,14 @@ export default function EditPostPage() {
       try {
         const postData = await getPost(postId);
         if (!postData) {
-          alert("Post not found");
+          showMessage("Post not found", "error");
           router.push("/dashboard");
           return;
         }
 
         // Check permissions - only author or owner can edit
         if (postData.authorId !== user?.uid && profile?.role !== "owner") {
-          alert("You don't have permission to edit this post");
+          showMessage("You don't have permission to edit this post", "error");
           router.push("/dashboard");
           return;
         }
@@ -64,7 +67,7 @@ export default function EditPostPage() {
         });
       } catch (error) {
         console.error("Error loading post:", error);
-        alert("Failed to load post");
+        showMessage("Failed to load post", "error");
         router.push("/dashboard");
       } finally {
         setLoadingPost(false);
@@ -74,11 +77,11 @@ export default function EditPostPage() {
     if (!loading && user && postId) {
       loadPost();
     }
-  }, [user, profile, loading, postId, router]);
+  }, [user, profile, loading, postId, router, showMessage]);
 
   const handleGenerateExcerpt = async () => {
     if (!formData.title || !formData.content) {
-      alert("Please enter a title and content first");
+      showMessage("Please enter a title and content first", "warning");
       return;
     }
 
@@ -102,7 +105,7 @@ export default function EditPostPage() {
       setFormData({ ...formData, excerpt: data.excerpt });
     } catch (error: any) {
       console.error("Error generating excerpt:", error);
-      alert(`Failed to generate excerpt: ${error.message}`);
+      showMessage(`Failed to generate excerpt: ${error.message}`, "error");
     } finally {
       setGenerating(false);
     }
@@ -147,11 +150,11 @@ export default function EditPostPage() {
         }
       }
 
-      alert("Post updated successfully!");
+      showMessage("Post updated successfully!", "success");
       router.push("/dashboard");
     } catch (error) {
       console.error("Error updating post:", error);
-      alert("Failed to update post. Please try again.");
+      showMessage("Failed to update post. Please try again.", "error");
     } finally {
       setSaving(false);
     }
@@ -159,7 +162,8 @@ export default function EditPostPage() {
 
   const handleDelete = async () => {
     if (
-      !confirm(
+      typeof window !== "undefined" &&
+      !window.confirm(
         "Are you sure you want to delete this post? This action cannot be undone.",
       )
     ) {
@@ -169,11 +173,11 @@ export default function EditPostPage() {
     setDeleting(true);
     try {
       await deletePost(postId);
-      alert("Post deleted successfully!");
+      showMessage("Post deleted successfully!", "success");
       router.push("/dashboard");
     } catch (error) {
       console.error("Error deleting post:", error);
-      alert("Failed to delete post. Please try again.");
+      showMessage("Failed to delete post. Please try again.", "error");
       setDeleting(false);
     }
   };

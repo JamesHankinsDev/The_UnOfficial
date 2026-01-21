@@ -46,7 +46,7 @@ export default function DashboardPage() {
             collection(firestore, "posts"),
             where("authorId", "==", user.uid),
             where("status", "==", "draft"),
-            orderBy("updatedAt", "desc")
+            orderBy("updatedAt", "desc"),
           );
           const snap = await getDocs(q);
           const draftPosts = snap.docs.map((doc) => ({
@@ -78,7 +78,7 @@ export default function DashboardPage() {
           const allDraftPosts = await getAllDrafts();
           // Filter out user's own drafts
           const othersDrafts = allDraftPosts.filter(
-            (draft) => draft.authorId !== user.uid
+            (draft) => draft.authorId !== user.uid,
           );
           setAllDrafts(othersDrafts);
         } catch (error) {
@@ -106,7 +106,7 @@ export default function DashboardPage() {
             collection(firestore, "posts"),
             where("authorId", "==", user.uid),
             where("status", "==", "published"),
-            orderBy("publishedAt", "desc")
+            orderBy("publishedAt", "desc"),
           );
           const snap = await getDocs(q);
           const pubPosts = snap.docs.map((doc) => ({
@@ -155,7 +155,7 @@ export default function DashboardPage() {
     try {
       const code = await generateInviteCode(
         user.uid,
-        user.displayName || user.email || "Unknown"
+        user.displayName || user.email || "Unknown",
       );
 
       // Reload invite codes
@@ -183,7 +183,7 @@ export default function DashboardPage() {
   const handleUnpublish = async (postId: string) => {
     if (
       !confirm(
-        "Unpublish this post? It will move back to drafts and be hidden from readers."
+        "Unpublish this post? It will move back to drafts and be hidden from readers.",
       )
     ) {
       return;
@@ -239,7 +239,7 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-start sm:flex-col sm:flex-row items-start sm:items-center gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8">
           {user.photoURL && (
             <img
               src={user.photoURL}
@@ -251,7 +251,9 @@ export default function DashboardPage() {
             <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-gray-100 truncate">
               {user.displayName || "User"}
             </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{user.email}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+              {user.email}
+            </p>
             {profile?.role && (
               <span
                 className={`inline-block mt-2 px-3 py-1 text-sm font-medium rounded-full ${
@@ -366,7 +368,7 @@ export default function DashboardPage() {
                           <span>
                             Updated:{" "}
                             {new Date(
-                              draft.updatedAt?.seconds * 1000 || Date.now()
+                              draft.updatedAt?.seconds * 1000 || Date.now(),
                             ).toLocaleDateString()}
                           </span>
                         </div>
@@ -433,7 +435,7 @@ export default function DashboardPage() {
                           <span>
                             Updated:{" "}
                             {new Date(
-                              draft.updatedAt?.seconds * 1000 || Date.now()
+                              draft.updatedAt?.seconds * 1000 || Date.now(),
                             ).toLocaleDateString()}
                           </span>
                         </div>
@@ -505,7 +507,7 @@ export default function DashboardPage() {
                           <span>
                             Published:{" "}
                             {new Date(
-                              post.publishedAt?.seconds * 1000 || Date.now()
+                              post.publishedAt?.seconds * 1000 || Date.now(),
                             ).toLocaleDateString()}
                           </span>
                         </div>
@@ -613,7 +615,7 @@ export default function DashboardPage() {
                               on{" "}
                               {invite.usedAt &&
                                 new Date(
-                                  invite.usedAt.seconds * 1000
+                                  invite.usedAt.seconds * 1000,
                                 ).toLocaleDateString()}
                             </p>
                           ) : (
@@ -621,7 +623,7 @@ export default function DashboardPage() {
                               Created{" "}
                               {invite.createdAt &&
                                 new Date(
-                                  invite.createdAt.seconds * 1000
+                                  invite.createdAt.seconds * 1000,
                                 ).toLocaleDateString()}
                             </p>
                           )}

@@ -1,95 +1,201 @@
+"use client";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Link from "next/link";
+import Divider from "@mui/material/Divider";
+import Container from "@mui/material/Container";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useState } from "react";
+
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [expanded, setExpanded] = useState(false);
 
   return (
-    <footer className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 mt-auto">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Brand Section */}
-          <div>
-            <h3 className="text-lg font-bold text-primary dark:text-tertiary mb-3">
-              The UnOfficial
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Where Stories Come Alive. Smart, fun, optimistic NBA writing that sounds like your group chat.
-            </p>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-wider">
-              Quick Links
-            </h4>
-            <ul className="space-y-2">
-              <li>
-                <a
-                  href="/"
-                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-tertiary dark:hover:text-tertiary transition-colors"
+    <Box
+      component="footer"
+      sx={{
+        borderTop: 1,
+        borderColor: "divider",
+        bgcolor: "background.paper",
+        mt: "auto",
+        py: { xs: 2, md: 8 },
+      }}
+    >
+      <Container maxWidth="lg">
+        <Accordion
+          expanded={expanded}
+          onChange={() => setExpanded((prev) => !prev)}
+          sx={{ boxShadow: "none", bgcolor: "background.paper", mb: 0 }}
+        >
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="footer-content"
+            id="footer-toggle"
+            sx={{ px: 0, bgcolor: "background.paper", borderRadius: 1 }}
+          >
+            <Typography
+              variant="subtitle1"
+              color="text.primary"
+              fontWeight={700}
+            >
+              {expanded ? "Hide Site Info & Links" : "Show Site Info & Links"}
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails
+            sx={{ px: 0, bgcolor: "background.paper", borderRadius: 1 }}
+          >
+            <Box
+              display="grid"
+              gridTemplateColumns={{ xs: "1fr", md: "1fr 1fr 1fr" }}
+              gap={8}
+            >
+              {/* Brand Section */}
+              <Box>
+                <Typography
+                  variant="h6"
+                  color="text.primary"
+                  fontWeight={700}
+                  mb={1}
                 >
-                  Home
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/posts"
-                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-tertiary dark:hover:text-tertiary transition-colors"
+                  The UnOfficial
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Where Stories Come Alive. Smart, fun, optimistic NBA writing
+                  that sounds like your group chat.
+                </Typography>
+              </Box>
+              {/* Quick Links */}
+              <Box>
+                <Typography
+                  variant="subtitle2"
+                  color="text.primary"
+                  fontWeight={600}
+                  mb={1}
+                  sx={{ textTransform: "uppercase", letterSpacing: 1 }}
                 >
-                  Articles
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/about"
-                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-tertiary dark:hover:text-tertiary transition-colors"
+                  Quick Links
+                </Typography>
+                <Box component="ul" sx={{ listStyle: "none", p: 0, m: 0 }}>
+                  <li>
+                    <Link
+                      href="/"
+                      style={{ color: "inherit", textDecoration: "none" }}
+                    >
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ "&:hover": { color: "success.main" } }}
+                      >
+                        Home
+                      </Typography>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/posts"
+                      style={{ color: "inherit", textDecoration: "none" }}
+                    >
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ "&:hover": { color: "success.main" } }}
+                      >
+                        Articles
+                      </Typography>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/about"
+                      style={{ color: "inherit", textDecoration: "none" }}
+                    >
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ "&:hover": { color: "success.main" } }}
+                      >
+                        About
+                      </Typography>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/dashboard"
+                      style={{ color: "inherit", textDecoration: "none" }}
+                    >
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ "&:hover": { color: "success.main" } }}
+                      >
+                        Dashboard
+                      </Typography>
+                    </Link>
+                  </li>
+                </Box>
+              </Box>
+              {/* Connect */}
+              <Box>
+                <Typography
+                  variant="subtitle2"
+                  color="text.primary"
+                  fontWeight={600}
+                  mb={1}
+                  sx={{ textTransform: "uppercase", letterSpacing: 1 }}
                 >
-                  About
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/dashboard"
-                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-tertiary dark:hover:text-tertiary transition-colors"
-                >
-                  Dashboard
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Connect */}
-          <div>
-            <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-wider">
-              Connect
-            </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-              Real fans, real talk. Join the conversation about the game we love.
-            </p>
-          </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              © {currentYear} The UnOfficial. All rights reserved.
-            </p>
-            <div className="flex gap-6">
-              <a
-                href="/posts"
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-tertiary dark:hover:text-tertiary transition-colors"
+                  Connect
+                </Typography>
+                <Typography variant="body2" color="text.secondary" mb={2}>
+                  Real fans, real talk. Join the conversation about the game we
+                  love.
+                </Typography>
+              </Box>
+            </Box>
+          </AccordionDetails>
+        </Accordion>
+        <Divider sx={{ my: 2, display: expanded ? "block" : "none" }} />
+        <Box
+          display="flex"
+          flexDirection={{ xs: "column", md: "row" }}
+          justifyContent="space-between"
+          alignItems="center"
+          gap={4}
+        >
+          <Typography variant="body2" color="text.secondary">
+            © {currentYear} The UnOfficial. All rights reserved.
+          </Typography>
+          <Box display="flex" gap={4}>
+            <Link
+              href="/posts"
+              style={{ color: "inherit", textDecoration: "none" }}
+            >
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ "&:hover": { color: "success.main" } }}
               >
                 Latest Posts
-              </a>
-              <a
-                href="/about"
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-tertiary dark:hover:text-tertiary transition-colors"
+              </Typography>
+            </Link>
+            <Link
+              href="/about"
+              style={{ color: "inherit", textDecoration: "none" }}
+            >
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ "&:hover": { color: "success.main" } }}
               >
                 About Us
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </footer>
+              </Typography>
+            </Link>
+          </Box>
+        </Box>
+      </Container>
+    </Box>
   );
 }

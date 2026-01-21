@@ -3,9 +3,9 @@ import NavBar from "../components/NavBar";
 import ThemeToggle from "../components/ThemeToggle";
 import Footer from "../components/Footer";
 import AuthProvider from "../components/AuthProvider";
-
 import IntroAnimation from "../components/IntroAnimation";
-import { Toaster } from "react-hot-toast";
+import MuiSnackbarProvider from "../components/MuiSnackbar";
+import MuiAppProvider from "../components/MuiAppProvider.client";
 
 export const metadata = {
   title: "The UnOfficial",
@@ -21,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon.png" type="image/png" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -36,7 +36,10 @@ export default function RootLayout({
           }}
         />
         {/* Plausible Analytics */}
-        <script async src="https://plausible.io/js/pa--jHguBzxvrmKAgSeGgtcb.js"></script>
+        <script
+          async
+          src="https://plausible.io/js/pa--jHguBzxvrmKAgSeGgtcb.js"
+        ></script>
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -47,18 +50,21 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
-        <AuthProvider>
-          <IntroAnimation />
-          <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
-          <div className="min-h-screen flex flex-col">
-            <NavBar />
-            <main className="flex-1 container mx-auto px-4 py-8">
-              {children}
-            </main>
-            <Footer />
-            <ThemeToggle />
-          </div>
-        </AuthProvider>
+        <MuiAppProvider>
+          <MuiSnackbarProvider>
+            <AuthProvider>
+              <IntroAnimation />
+              <div className="min-h-screen flex flex-col">
+                <NavBar />
+                <main className="flex-1 container mx-auto px-4 py-8">
+                  {children}
+                </main>
+                <Footer />
+                <ThemeToggle />
+              </div>
+            </AuthProvider>
+          </MuiSnackbarProvider>
+        </MuiAppProvider>
       </body>
     </html>
   );

@@ -2,7 +2,7 @@
 import { useAuth } from "../../components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
+import { useSnackbar } from "../../components/MuiSnackbar";
 import {
   updateNotificationPreferences,
   type NotificationPreferences,
@@ -10,6 +10,7 @@ import {
 
 export default function SettingsPage() {
   const { user, profile, loading } = useAuth();
+  const { showMessage } = useSnackbar();
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [notificationPrefs, setNotificationPrefs] =
@@ -36,17 +37,17 @@ export default function SettingsPage() {
 
     // Validate phone number if SMS is enabled
     if (notificationPrefs.smsNotifications && !notificationPrefs.phoneNumber) {
-      toast.error("Please enter a phone number for SMS notifications");
+      showMessage("Please enter a phone number for SMS notifications", "error");
       return;
     }
 
     setSaving(true);
     try {
       await updateNotificationPreferences(user.uid, notificationPrefs);
-      toast.success("Notification preferences saved successfully!");
+      showMessage("Notification preferences saved successfully!", "success");
     } catch (error) {
       console.error("Error saving preferences:", error);
-      toast.error("Failed to save preferences. Please try again.");
+      showMessage("Failed to save preferences. Please try again.", "error");
     } finally {
       setSaving(false);
     }

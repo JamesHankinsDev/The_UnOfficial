@@ -2,12 +2,14 @@
 import { useAuth } from "../../../components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "react-hot-toast";
+import { useSnackbar } from "../../../components/MuiSnackbar";
 import { createPost } from "../../../lib/firebase/posts";
 import { slugify } from "../../../lib/utils";
 
+
 export default function CreatePostPage() {
   const { user, profile, loading } = useAuth();
+  const { showMessage } = useSnackbar();
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -32,9 +34,10 @@ export default function CreatePostPage() {
       router.push("/dashboard");
     }
   }, [user, profile, loading, router]);
+
   const handleGenerateExcerpt = async () => {
     if (!formData.title || !formData.content) {
-      toast.error("Please enter a title and content first");
+      showMessage("Please enter a title and content first", "error");
       return;
     }
 
@@ -58,11 +61,12 @@ export default function CreatePostPage() {
       setFormData({ ...formData, excerpt: data.excerpt });
     } catch (error: any) {
       console.error("Error generating excerpt:", error);
-      toast.error(`Failed to generate excerpt: ${error.message}`);
+      showMessage(`Failed to generate excerpt: ${error.message}`, "error");
     } finally {
       setGenerating(false);
     }
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !formData.title || !formData.content) return;
@@ -102,11 +106,11 @@ export default function CreatePostPage() {
         }
       }
 
-      toast.success("Post created successfully!");
+      showMessage("Post created successfully!", "success");
       router.push(`/posts/${slug}`);
     } catch (error) {
       console.error("Error creating post:", error);
-      toast.error("Failed to create post. Please try again.");
+      showMessage("Failed to create post. Please try again.", "error");
     } finally {
       setSaving(false);
     }

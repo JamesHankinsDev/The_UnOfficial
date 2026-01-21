@@ -1,23 +1,24 @@
 "use client";
+
+import { useEffect, useRef } from "react";
+
 // ShopifyBuy types for window
 declare global {
   interface Window {
     ShopifyBuy?: any;
   }
 }
-import { useEffect } from "react";
 
 export default function ShopifyBuyButton() {
+  const initialized = useRef(false);
+
   useEffect(() => {
+    if (initialized.current) return;
     const node = document.getElementById("collection-component-1768959071335");
     if (node) {
-      // Prevent double-initialization
-      if (
-        window.ShopifyBuy &&
-        window.ShopifyBuy.UI &&
-        node.children.length > 0
-      ) {
-        return;
+      // Remove any existing children to prevent duplicates
+      while (node.firstChild) {
+        node.removeChild(node.firstChild);
       }
       const scriptURL =
         "https://sdks.shopifycdn.com/buy-button/latest/buy-button-storefront.min.js";
@@ -182,6 +183,7 @@ export default function ShopifyBuyButton() {
             },
           });
         });
+        initialized.current = true;
       }
       function loadScript() {
         const script = document.createElement("script");
@@ -200,6 +202,7 @@ export default function ShopifyBuyButton() {
         loadScript();
       }
     }
+    initialized.current = true;
   }, []);
 
   return (
