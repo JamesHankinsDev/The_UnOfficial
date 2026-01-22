@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSnackbar } from "../../../components/MuiSnackbar";
 import { createPost } from "../../../lib/firebase/posts";
+import { uploadPostAudio } from "../../../lib/firebase/storage";
 import { slugify } from "../../../lib/utils";
 
 export default function CreatePostPage() {
@@ -19,6 +20,8 @@ export default function CreatePostPage() {
     tags: "",
     status: "draft" as "draft" | "published",
   });
+  // Optional audio blob
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -73,6 +76,19 @@ export default function CreatePostPage() {
     setSaving(true);
     try {
       const slug = slugify(formData.title);
+      let audioUrl: string | null = null;
+      if (audioBlob) {
+        try {
+          // Upload audio and get URL
+          audioUrl = await uploadPostAudio(slug, audioBlob);
+        } catch (err) {
+          console.error("Audio upload failed:", err);
+          showMessage(
+            "Audio upload failed, post will save without audio.",
+            "warning",
+          );
+        }
+      }
       const postId = await createPost({
         title: formData.title,
         slug,
@@ -85,6 +101,7 @@ export default function CreatePostPage() {
         tags: formData.tags
           ? formData.tags.split(",").map((t) => t.trim())
           : [],
+        audioUrl,
       });
 
       // If publishing (not draft), send notifications to subscribers
@@ -231,6 +248,29 @@ export default function CreatePostPage() {
             />
           </div>
 
+          {/* Optional audio upload UI */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+              Audio (optional)
+            </label>
+            <input
+              type="file"
+              accept="audio/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                setAudioBlob(file);
+              }}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-tertiary focus:border-transparent"
+            />
+            {audioBlob && (
+              <span className="text-xs text-gray-600 dark:text-gray-400">
+                Audio file selected:{" "}
+                {audioBlob instanceof File && audioBlob.name
+                  ? audioBlob.name
+                  : "blob"}
+              </span>
+            )}
+          </div>
           <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-4">
               <label className="flex items-center gap-2">

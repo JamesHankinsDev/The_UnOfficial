@@ -10,7 +10,7 @@ import {
   updatePost,
   deletePost,
 } from "../../../../lib/firebase/posts";
-import { uploadPostAudio } from "../../../../lib/firebase/storage";
+import { uploadPostAudio, deletePostAudio } from "../../../../lib/firebase/storage";
 import type { Post } from "../../../../lib/firebase/posts";
 import { slugify } from "../../../../lib/utils";
 
@@ -72,10 +72,18 @@ export default function EditPostPage() {
     setIsPreview(false);
   };
 
-  const handleDeleteAudio = () => {
-    setAudioBlob(null);
-    setAudioURL(null);
-    audioChunks.current = [];
+  const handleDeleteAudio = async () => {
+    if (!postId) return;
+    try {
+      await deletePostAudio(postId);
+      await updatePost(postId, { audioUrl: null });
+      setAudioBlob(null);
+      setAudioURL(null);
+      audioChunks.current = [];
+      showMessage("Audio deleted.", "success");
+    } catch (err) {
+      showMessage("Failed to delete audio.", "error");
+    }
   };
 
   useEffect(() => {
@@ -94,9 +102,16 @@ export default function EditPostPage() {
           return;
         }
 
-        // Check permissions - only author or owner can edit
-        if (postData.authorId !== user?.uid && profile?.role !== "owner") {
-          showMessage("You don't have permission to edit this post", "error");
+        // Check permissions - only author or owner can edit/preview
+        if (
+          postData.authorId !== user?.uid &&
+          profile?.role !== "owner" &&
+          profile?.role !== "writer"
+        ) {
+          showMessage(
+            "You don't have permission to edit or preview this post",
+            "error",
+          );
           router.push("/dashboard");
           return;
         }
@@ -116,6 +131,10 @@ export default function EditPostPage() {
               ).format("YYYY-MM-DDTHH:mm")
             : "",
         });
+        // If post has audioUrl, set for preview
+        if (postData.audioUrl) {
+          setAudioURL(postData.audioUrl);
+        }
       } catch (error) {
         console.error("Error loading post:", error);
         showMessage("Failed to load post", "error");
@@ -275,34 +294,63 @@ export default function EditPostPage() {
           </button>
         </div>
 
-        {/* Audio Recording Section - always visible */}
+        {/* Audio Section: preview existing, record new, or upload new */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-            Optional: Record Audio for this Article
+            Optional: Audio for this Article
           </label>
           <div className="flex flex-col gap-2">
-            {audioURL ? (
+            {audioURL && !audioBlob && (
               <div className="flex flex-col gap-2">
                 <audio controls src={audioURL} className="w-full" />
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={handleDeleteAudio}
-                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    Delete Audio
-                  </button>
-                </div>
+                <span className="text-xs text-gray-600 dark:text-gray-400">
+                  Current audio file
+                </span>
+                <button
+                  type="button"
+                  onClick={handleDeleteAudio}
+                  className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 w-fit"
+                >
+                  Delete Audio
+                </button>
               </div>
-            ) : (
-              <button
-                type="button"
-                onClick={recording ? handleStopRecording : handleStartRecording}
-                className={`px-4 py-2 rounded text-white font-medium transition-all ${recording ? "bg-yellow-500 hover:bg-yellow-600" : "bg-blue-600 hover:bg-blue-700"}`}
-              >
-                {recording ? "Stop Recording" : "Start Recording"}
-              </button>
             )}
+            {audioBlob && (
+              <div className="flex flex-col gap-2">
+                <audio
+                  controls
+                  src={URL.createObjectURL(audioBlob)}
+                  className="w-full"
+                />
+                <span className="text-xs text-gray-600 dark:text-gray-400">
+                  New audio file selected
+                </span>
+                <button
+                  type="button"
+                  onClick={handleDeleteAudio}
+                  className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                >
+                  Remove New Audio
+                </button>
+              </div>
+            )}
+            <input
+              type="file"
+              accept="audio/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                setAudioBlob(file);
+                setAudioURL(null);
+              }}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-slate-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-tertiary focus:border-transparent"
+            />
+            <button
+              type="button"
+              onClick={recording ? handleStopRecording : handleStartRecording}
+              className={`px-4 py-2 rounded text-white font-medium transition-all ${recording ? "bg-yellow-500 hover:bg-yellow-600" : "bg-blue-600 hover:bg-blue-700"}`}
+            >
+              {recording ? "Stop Recording" : "Record Audio"}
+            </button>
             {recording && (
               <span className="text-xs text-yellow-600 font-semibold animate-pulse">
                 ● Recording... Speak now!

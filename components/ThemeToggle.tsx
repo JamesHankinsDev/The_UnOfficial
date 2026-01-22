@@ -11,7 +11,9 @@ export default function ThemeToggle() {
       shouldBeDark = true;
     } else {
       const stored = localStorage.getItem("theme");
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
       shouldBeDark = stored === "dark" || (!stored && prefersDark);
     }
     setIsDark(shouldBeDark);
