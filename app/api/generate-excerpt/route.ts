@@ -51,7 +51,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("Excerpt generated successfully");
     return NextResponse.json({ excerpt });
   } catch (error: any) {
     console.error("Error generating excerpt:", error);
