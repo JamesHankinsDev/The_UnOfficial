@@ -71,7 +71,7 @@ export default function PostsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search posts by title, excerpt, or tags..."
-          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-tertiary focus:border-transparent"
+          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-primary.main dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-tertiary focus:border-transparent"
         />
       </div>
 

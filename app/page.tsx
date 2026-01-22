@@ -15,6 +15,7 @@ import SwiperCore from "swiper";
 import "swiper/css";
 import "swiper/css/autoplay";
 import { Autoplay } from "swiper/modules";
+import MobileAccordion from "../components/MobileAccordion";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -34,8 +35,11 @@ type Post = {
 
 export default function Home() {
   SwiperCore.use([Autoplay]);
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  // 0 = What's New, 1 = What's on the way
+  const [openSection, setOpenSection] = useState<0 | 1>(0);
 
   useEffect(() => {
     async function load() {
@@ -158,34 +162,70 @@ export default function Home() {
   // Latest posts (already filtered for public)
   return (
     <div>
-      <section className="mb-8 p-6 bg-tertiary/10 dark:bg-tertiary/20 rounded-lg border border-tertiary/20 dark:border-tertiary/30">
-        <h1 className="text-3xl font-bold mb-2 text-tertiary">
-          Welcome to The UnOfficial!
-        </h1>
-        <p className="text-lg text-gray-700 dark:text-gray-200 ">
-          The UnOfficial is a grassroots home-brew platform dedicated to sharing
-          the stories around the NBA and the Basketball World. I'm glad you're
-          here.{" "}
-        </p>
-        <h3 className="text-xl font-bold my-4 text-tertiary">
-          THE VIBE CHECK (AKA: THE UNOFFICIAL EDITORIAL POLICY)
-        </h3>
-        <ul className="list-disc pl-6 space-y-2">
-          <li>
-            We’re here for clarity, not superiority. If you need a PhD to enjoy
-            the article, I failed.
-          </li>
-          <li>
-            Stats are seasoning, not the whole meal. Numbers are here to make
-            stories concrete, not to replace them. The tone stays human. If you
-            can’t read it out loud at a bar and feel normal, it’s too formal.
-          </li>
-          <li>
-            We respect the moment. When the league hands us a good storyline, we
-            don’t overcomplicate it. We just put it on the tape.
-          </li>
-        </ul>
-      </section>
+      {isMobile ? (
+        <div className="mb-8">
+          <MobileAccordion
+            title="Welcome to The UnOfficial!"
+            defaultOpen={false}
+          >
+            <p className="text-lg text-gray-700 dark:text-gray-200 ">
+              The UnOfficial is a grassroots home-brew platform dedicated to
+              sharing the stories around the NBA and the Basketball World. I'm
+              glad you're here.
+            </p>
+            <h3 className="text-xl font-bold my-4 text-tertiary">
+              THE VIBE CHECK (AKA: THE UNOFFICIAL EDITORIAL POLICY)
+            </h3>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>
+                We’re here for clarity, not superiority. If you need a PhD to
+                enjoy the article, I failed.
+              </li>
+              <li>
+                Stats are seasoning, not the whole meal. Numbers are here to
+                make stories concrete, not to replace them. The tone stays
+                human. If you can’t read it out loud at a bar and feel normal,
+                it’s too formal.
+              </li>
+              <li>
+                We respect the moment. When the league hands us a good
+                storyline, we don’t overcomplicate it. We just put it on the
+                tape.
+              </li>
+            </ul>
+          </MobileAccordion>
+        </div>
+      ) : (
+        <section className="mb-8 p-6 bg-tertiary/40 dark:bg-tertiary/10 rounded-lg border border-tertiary/20 dark:border-tertiary/30">
+          <h1 className="text-3xl font-bold mb-2 dark:text-tertiary">
+            Welcome to The UnOfficial!
+          </h1>
+          <p className="text-lg text-gray-700 dark:text-gray-200 ">
+            The UnOfficial is a grassroots home-brew platform dedicated to
+            sharing the stories around the NBA and the Basketball World. I'm
+            glad you're here.{" "}
+          </p>
+          <h3 className="text-xl font-bold my-4 dark:text-tertiary">
+            THE VIBE CHECK (AKA: THE UNOFFICIAL EDITORIAL POLICY)
+          </h3>
+          <ul className="list-disc pl-6 space-y-2">
+            <li>
+              We’re here for clarity, not superiority. If you need a PhD to
+              enjoy the article, I failed.
+            </li>
+            <li>
+              Stats are seasoning, not the whole meal. Numbers are here to make
+              stories concrete, not to replace them. The tone stays human. If
+              you can’t read it out loud at a bar and feel normal, it’s too
+              formal.
+            </li>
+            <li>
+              We respect the moment. When the league hands us a good storyline,
+              we don’t overcomplicate it. We just put it on the tape.
+            </li>
+          </ul>
+        </section>
+      )}
       <h1 className="text-3xl font-semibold mb-6">Latest posts</h1>
       {loading ? (
         <p>Loading...</p>
@@ -193,99 +233,195 @@ export default function Home() {
         <>
           {whatsNew.length > 0 && (
             <div className="mb-10">
-              <h2 className="text-2xl font-bold mb-4 text-tertiary">
-                What's New
-              </h2>
-              <Swiper
-                spaceBetween={48}
-                slidesPerView={2}
-                breakpoints={{
-                  640: { slidesPerView: 1 },
-                  1024: { slidesPerView: 2 },
-                  1280: { slidesPerView: 2 },
-                }}
-                autoplay={{ delay: 1500, disableOnInteraction: false }}
-                direction="horizontal"
-                loop={true}
-                modules={[Autoplay]}
-              >
-                {uniqueById(whatsNew).map((p) => (
-                  <SwiperSlide key={p.id}>
-                    <div className="flex h-full">
-                      <PostCard post={p} />
-                    </div>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
+              {isMobile ? (
+                <MobileAccordion
+                  title="What's New"
+                  defaultOpen={openSection === 0}
+                >
+                  <button
+                    className="w-full h-0 p-0 m-0 border-0 bg-transparent"
+                    tabIndex={-1}
+                    aria-hidden
+                    style={{ display: "none" }}
+                    onClick={() => setOpenSection(0)}
+                  />
+                  <div
+                    className="flex flex-col gap-6"
+                    onClick={() => setOpenSection(0)}
+                  >
+                    {uniqueById(whatsNew).map((p) => (
+                      <div className="flex h-full" key={p.id}>
+                        <PostCard post={p} />
+                      </div>
+                    ))}
+                  </div>
+                </MobileAccordion>
+              ) : (
+                <>
+                  <h2 className="text-2xl font-bold mb-4 dark:text-tertiary">
+                    What's New
+                  </h2>
+                  <Swiper
+                    spaceBetween={48}
+                    slidesPerView={2}
+                    breakpoints={{
+                      640: { slidesPerView: 1 },
+                      1024: { slidesPerView: 2 },
+                      1280: { slidesPerView: 2 },
+                    }}
+                    autoplay={{ delay: 1500, disableOnInteraction: false }}
+                    direction="horizontal"
+                    loop={true}
+                    modules={[Autoplay]}
+                  >
+                    {uniqueById(whatsNew).map((p) => (
+                      <SwiperSlide key={p.id}>
+                        <div className="flex h-full">
+                          <PostCard post={p} />
+                        </div>
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+                </>
+              )}
             </div>
           )}
 
           {whatsOnTheWay.length > 0 && (
             <div className="mb-10">
-              <h2 className="text-2xl font-bold mb-4 text-tertiary">
-                What's on the way
-              </h2>
-              <Swiper
-                spaceBetween={48}
-                slidesPerView={0.5}
-                breakpoints={{
-                  640: { slidesPerView: 1 },
-                  1024: { slidesPerView: 2 },
-                  1280: { slidesPerView: 2 },
-                }}
-                autoplay={{ delay: 2500, disableOnInteraction: false }}
-                direction="horizontal"
-                loop={true}
-                modules={[Autoplay]}
-              >
-                {uniqueById(whatsOnTheWay).map((p) => {
-                  let release;
-                  if (p.releaseDate) {
-                    if (
-                      typeof p.releaseDate === "object" &&
-                      "seconds" in p.releaseDate
-                    ) {
-                      release = dayjs(new Date(p.releaseDate.seconds * 1000));
-                    } else {
-                      release = dayjs(p.releaseDate);
-                    }
-                  } else {
-                    release = dayjs();
-                  }
-                  const now = dayjs();
-                  return (
-                    <SwiperSlide key={p.id}>
-                      <div className="flex h-full">
-                        <article className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 w-full">
-                          <h2 className="text-2xl font-bold text-primary dark:text-tertiary mb-3">
-                            {p.title}
-                          </h2>
-                          <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">
-                            {p.excerpt}
-                          </p>
-                          <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-                            <span className="font-medium text-gray-900 dark:text-gray-100">
-                              {p.authorName}
-                            </span>
-                            {p.releaseDate && (
-                              <time className="text-gray-500 dark:text-gray-500">
-                                {release.format("MMM D, YYYY h:mm A")}
-                              </time>
-                            )}
+              {isMobile ? (
+                <MobileAccordion
+                  title="What's on the way"
+                  defaultOpen={openSection === 1}
+                >
+                  <button
+                    className="w-full h-0 p-0 m-0 border-0 bg-transparent"
+                    tabIndex={-1}
+                    aria-hidden
+                    style={{ display: "none" }}
+                    onClick={() => setOpenSection(1)}
+                  />
+                  <div
+                    className="flex flex-col gap-6"
+                    onClick={() => setOpenSection(1)}
+                  >
+                    {uniqueById(whatsOnTheWay).map((p) => {
+                      let release;
+                      if (p.releaseDate) {
+                        if (
+                          typeof p.releaseDate === "object" &&
+                          "seconds" in p.releaseDate
+                        ) {
+                          release = dayjs(
+                            new Date(p.releaseDate.seconds * 1000),
+                          );
+                        } else {
+                          release = dayjs(p.releaseDate);
+                        }
+                      } else {
+                        release = dayjs();
+                      }
+                      return (
+                        <div className="flex h-full" key={p.id}>
+                          <article className="bg-primary.main dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 w-full">
+                            <h2 className="text-2xl font-bold text-primary dark:text-tertiary mb-3">
+                              {p.title}
+                            </h2>
+                            <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">
+                              {p.excerpt}
+                            </p>
+                            <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                              <span className="font-medium text-gray-900 dark:text-gray-100">
+                                {p.authorName}
+                              </span>
+                              {p.releaseDate && (
+                                <time className="text-gray-500 dark:text-gray-500">
+                                  {release.format("MMM D, YYYY h:mm A")}
+                                </time>
+                              )}
+                            </div>
+                            {/* Navigation disabled until publish date/time */}
+                            <button
+                              className="mt-4 px-4 py-2 rounded bg-gray-300 text-gray-600 cursor-not-allowed opacity-60 w-auto"
+                              disabled
+                            >
+                              Available {release.fromNow()}
+                            </button>
+                          </article>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </MobileAccordion>
+              ) : (
+                <>
+                  <h2 className="text-2xl font-bold mb-4 dark:text-tertiary">
+                    What's on the way
+                  </h2>
+                  <Swiper
+                    spaceBetween={48}
+                    slidesPerView={0.5}
+                    breakpoints={{
+                      640: { slidesPerView: 1 },
+                      1024: { slidesPerView: 2 },
+                      1280: { slidesPerView: 2 },
+                    }}
+                    autoplay={{ delay: 2500, disableOnInteraction: false }}
+                    direction="horizontal"
+                    loop={true}
+                    modules={[Autoplay]}
+                  >
+                    {uniqueById(whatsOnTheWay).map((p) => {
+                      let release;
+                      if (p.releaseDate) {
+                        if (
+                          typeof p.releaseDate === "object" &&
+                          "seconds" in p.releaseDate
+                        ) {
+                          release = dayjs(
+                            new Date(p.releaseDate.seconds * 1000),
+                          );
+                        } else {
+                          release = dayjs(p.releaseDate);
+                        }
+                      } else {
+                        release = dayjs();
+                      }
+                      return (
+                        <SwiperSlide key={p.id}>
+                          <div className="flex h-full">
+                            <article className="bg-slate-200/40 dark:bg-gray-800 rounded-lg shadow-md p-6 border border-primary dark:border-gray-700 w-full">
+                              {/* Navigation disabled until publish date/time */}
+                              <button
+                                className="mb-4 px-4 py-2 rounded bg-tertiary text-primary cursor-not-allowed w-auto"
+                                disabled
+                              >
+                                Available {release.fromNow()}
+                              </button>
+                              <h2 className="text-2xl font-bold text-primary dark:text-tertiary mb-3">
+                                {p.title}
+                              </h2>
+                              <p className="text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">
+                                {p.excerpt}
+                              </p>
+                              <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+                                <span className="font-medium text-gray-900 dark:text-gray-100">
+                                  {p.authorName}
+                                </span>
+                                {p.releaseDate && (
+                                  <time className="text-gray-500 dark:text-gray-500">
+                                    {release.format("MMM D, YYYY")}
+                                  </time>
+                                )}
+                              </div>
+                            </article>
                           </div>
-                          {/* Navigation disabled until publish date/time */}
-                          <button
-                            className="mt-4 px-4 py-2 rounded bg-gray-300 text-gray-600 cursor-not-allowed opacity-60 w-auto"
-                            disabled
-                          >
-                            Available {release.fromNow()}
-                          </button>
-                        </article>
-                      </div>
-                    </SwiperSlide>
-                  );
-                })}
-              </Swiper>
+                        </SwiperSlide>
+                      );
+                    })}
+                  </Swiper>
+                </>
+              )}
             </div>
           )}
         </>

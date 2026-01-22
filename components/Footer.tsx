@@ -20,7 +20,7 @@ export default function Footer() {
       sx={{
         borderTop: 1,
         borderColor: "divider",
-        bgcolor: "background.paper",
+        bgcolor: "primary.main",
         mt: "auto",
         py: { xs: 2, md: 8 },
       }}
@@ -29,13 +29,13 @@ export default function Footer() {
         <Accordion
           expanded={expanded}
           onChange={() => setExpanded((prev) => !prev)}
-          sx={{ boxShadow: "none", bgcolor: "background.paper", mb: 0 }}
+          sx={{ boxShadow: "none", bgcolor: "primary.main", mb: 0 }}
         >
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls="footer-content"
             id="footer-toggle"
-            sx={{ px: 0, bgcolor: "background.paper", borderRadius: 1 }}
+            sx={{ px: 0, bgcolor: "primary.main", borderRadius: 1 }}
           >
             <Typography
               variant="subtitle1"
@@ -46,7 +46,7 @@ export default function Footer() {
             </Typography>
           </AccordionSummary>
           <AccordionDetails
-            sx={{ px: 0, bgcolor: "background.paper", borderRadius: 1 }}
+            sx={{ px: 0, bgcolor: "primary.main", borderRadius: 1 }}
           >
             <Box
               display="grid"
@@ -64,8 +64,7 @@ export default function Footer() {
                   The UnOfficial
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Where Stories Come Alive. Smart, fun, optimistic NBA writing
-                  that sounds like your group chat.
+                  Serious Fans, UnSerious Takes.
                 </Typography>
               </Box>
               {/* Quick Links */}

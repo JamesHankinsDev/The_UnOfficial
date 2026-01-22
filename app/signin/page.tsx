@@ -32,7 +32,7 @@ export default function SignInPage() {
 
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+      <div className="max-w-md w-full bg-slate-200 dark:bg-gray-800 rounded-lg shadow-lg p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary dark:text-tertiary mb-2">
             Welcome to The UnOfficial
@@ -44,7 +44,7 @@ export default function SignInPage() {
 
         <button
           onClick={handleSignIn}
-          className="w-full flex items-center justify-center gap-3 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 px-6 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors font-medium"
+          className="w-full flex items-center justify-center gap-3 bg-slate-200 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 px-6 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors font-medium"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path

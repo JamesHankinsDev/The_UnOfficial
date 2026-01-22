@@ -95,7 +95,7 @@ export default function ReviewDraftPage() {
         user.uid,
         user.displayName || "Unknown",
         user.email || "",
-        newComment.trim()
+        newComment.trim(),
       );
 
       // Reload comments
@@ -171,7 +171,7 @@ export default function ReviewDraftPage() {
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2">
-          <article className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+          <article className="bg-slate-200 dark:bg-gray-800 rounded-lg shadow-lg p-8">
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-4">
                 <span className="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 text-sm rounded-full font-medium">
@@ -222,7 +222,7 @@ export default function ReviewDraftPage() {
 
         {/* Comments Sidebar */}
         <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sticky top-6">
+          <div className="bg-slate-200 dark:bg-gray-800 rounded-lg shadow-lg p-6 sticky top-6">
             <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               Comments & Feedback
             </h2>
@@ -234,7 +234,7 @@ export default function ReviewDraftPage() {
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder="Leave feedback or suggestions..."
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-tertiary focus:border-transparent resize-none"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-slate-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-tertiary focus:border-transparent resize-none"
               />
               <button
                 type="submit"

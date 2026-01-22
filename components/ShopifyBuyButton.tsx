@@ -206,7 +206,7 @@ export default function ShopifyBuyButton() {
   }, []);
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 dark:bg-white">
+    <div className="bg-slate-200 rounded-lg shadow p-4 dark:bg-grey-900">
       <div id="collection-component-1768959071335" />
     </div>
   );

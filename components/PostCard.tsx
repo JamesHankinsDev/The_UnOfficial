@@ -12,7 +12,7 @@ export default function PostCard({ post }: { post: any }) {
   };
 
   return (
-    <article className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-200 dark:border-gray-700">
+    <article className="bg-slate-200/40 dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-primary dark:border-gray-700">
       <Link href={`/posts/${post.slug}`}>
         <h2 className="text-2xl font-bold text-primary dark:text-tertiary hover:text-accent dark:hover:text-accent transition-colors mb-3">
           {post.title}
@@ -30,7 +30,7 @@ export default function PostCard({ post }: { post: any }) {
           </span>
         </div>
         {post.publishedAt && (
-          <time className="text-gray-500 dark:text-gray-500">
+          <time className="text-gray-800 dark:text-gray-500">
             {formatDate(post.publishedAt)}
           </time>
         )}

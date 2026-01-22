@@ -29,9 +29,8 @@ export default function RootLayout({
               (function() {
                 const theme = localStorage.getItem('theme');
                 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (theme === 'dark' || (!theme && prefersDark)) {
-                  document.documentElement.classList.add('dark');
-                }
+                const shouldBeDark = theme === 'dark' || (!theme && prefersDark);
+                document.documentElement.classList.toggle('dark', shouldBeDark);
               })();
             `,
           }}
@@ -50,7 +49,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
+      <body className="bg-slate-400 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
         <MuiAppProvider>
           <MuiSnackbarProvider>
             <AuthProvider>

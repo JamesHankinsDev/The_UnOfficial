@@ -5,13 +5,15 @@ export default function ThemeToggle() {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    // Check localStorage and system preference on mount
-    const stored = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-    const shouldBeDark = stored === "dark" || (!stored && prefersDark);
-
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+    let shouldBeDark;
+    if (isMobile) {
+      shouldBeDark = true;
+    } else {
+      const stored = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      shouldBeDark = stored === "dark" || (!stored && prefersDark);
+    }
     setIsDark(shouldBeDark);
     document.documentElement.classList.toggle("dark", shouldBeDark);
   }, []);

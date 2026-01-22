@@ -1,12 +1,9 @@
 "use client";
 import { useAuth } from "../../../components/AuthProvider";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
-import dayjs from "dayjs";
-import MarkdownRenderer from "../../../components/MarkdownRenderer";
+import { useEffect, useState } from "react";
 import { useSnackbar } from "../../../components/MuiSnackbar";
 import { createPost } from "../../../lib/firebase/posts";
-import { uploadPostAudio } from "../../../lib/firebase/storage";
 import { slugify } from "../../../lib/utils";
 
 export default function CreatePostPage() {
@@ -21,52 +18,7 @@ export default function CreatePostPage() {
     excerpt: "",
     tags: "",
     status: "draft" as "draft" | "published",
-    releaseDate: "", // ISO string or empty
   });
-
-  // Preview mode for reading while recording
-  const [isPreview, setIsPreview] = useState(false);
-
-  // Audio recording state
-  const [recording, setRecording] = useState(false);
-  const [audioURL, setAudioURL] = useState<string | null>(null);
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunks = useRef<Blob[]>([]);
-
-  const handleStartRecording = async () => {
-    setIsPreview(true);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new window.MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunks.current = [];
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunks.current.push(e.data);
-      };
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(audioChunks.current, { type: "audio/webm" });
-        setAudioBlob(blob);
-        setAudioURL(URL.createObjectURL(blob));
-      };
-      mediaRecorder.start();
-      setRecording(true);
-    } catch (err) {
-      showMessage("Microphone access denied or unavailable.", "error");
-    }
-  };
-
-  const handleStopRecording = () => {
-    mediaRecorderRef.current?.stop();
-    setRecording(false);
-    setIsPreview(false);
-  };
-
-  const handleDeleteAudio = () => {
-    setAudioBlob(null);
-    setAudioURL(null);
-    audioChunks.current = [];
-  };
 
   useEffect(() => {
     if (!loading && !user) {
@@ -121,7 +73,6 @@ export default function CreatePostPage() {
     setSaving(true);
     try {
       const slug = slugify(formData.title);
-      // Create the post first to get the postId
       const postId = await createPost({
         title: formData.title,
         slug,
@@ -134,25 +85,7 @@ export default function CreatePostPage() {
         tags: formData.tags
           ? formData.tags.split(",").map((t) => t.trim())
           : [],
-        audioUrl: null,
-        ...(formData.releaseDate
-          ? { releaseDate: new Date(formData.releaseDate) }
-          : {}),
       });
-
-      // If there is an audio recording, upload it and update the post
-      if (audioBlob) {
-        try {
-          const audioUrl = await uploadPostAudio(postId, audioBlob);
-          await fetch("/api/posts/update-audio", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ postId, audioUrl }),
-          });
-        } catch (err) {
-          showMessage("Audio upload failed, but post was created.", "warning");
-        }
-      }
 
       // If publishing (not draft), send notifications to subscribers
       if (formData.status === "published") {
@@ -201,70 +134,7 @@ export default function CreatePostPage() {
           Create New Post
         </h1>
 
-        {/* Audio Recording Section - always visible */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-            Optional: Record Audio for this Article
-          </label>
-          <div className="flex flex-col gap-2">
-            {audioURL ? (
-              <div className="flex flex-col gap-2">
-                <audio controls src={audioURL} className="w-full" />
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={handleDeleteAudio}
-                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    Delete Audio
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={recording ? handleStopRecording : handleStartRecording}
-                className={`px-4 py-2 rounded text-white font-medium transition-all ${recording ? "bg-yellow-500 hover:bg-yellow-600" : "bg-blue-600 hover:bg-blue-700"}`}
-              >
-                {recording ? "Stop Recording" : "Start Recording"}
-              </button>
-            )}
-            {recording && (
-              <span className="text-xs text-yellow-600 font-semibold animate-pulse">
-                ● Recording... Speak now!
-              </span>
-            )}
-          </div>
-        </div>
-
-        {isPreview ? (
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-xl font-semibold">
-                Preview Mode (for Recording)
-              </h2>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsPreview(false);
-                  if (recording) handleStopRecording();
-                }}
-                className="text-blue-600 underline"
-              >
-                Back to Edit
-              </button>
-            </div>
-            <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
-              <MarkdownRenderer
-                content={formData.content || "Nothing to preview yet."}
-              />
-            </div>
-          </div>
-        ) : null}
-        <form
-          onSubmit={handleSubmit}
-          className={`space-y-6${isPreview ? " hidden" : ""}`}
-        >
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
               Title *
@@ -359,25 +229,6 @@ export default function CreatePostPage() {
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-tertiary focus:border-transparent"
               placeholder="basketball, nba, sports"
             />
-          </div>
-
-          {/* Release Date Picker */}
-          <div>
-            <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
-              Release Date (optional)
-            </label>
-            <input
-              type="datetime-local"
-              value={formData.releaseDate}
-              onChange={(e) =>
-                setFormData({ ...formData, releaseDate: e.target.value })
-              }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-tertiary focus:border-transparent"
-              min={dayjs().format("YYYY-MM-DDTHH:mm")}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Leave blank to publish immediately.
-            </p>
           </div>
 
           <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">

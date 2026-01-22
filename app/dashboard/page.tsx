@@ -226,7 +226,7 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 md:p-8">
+      <div className="bg-primary.main dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 md:p-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-primary dark:text-tertiary">
             Dashboard

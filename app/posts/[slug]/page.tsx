@@ -162,7 +162,7 @@ export default function PostDetail({
       <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
         <a
           href="/posts"
-          className="text-tertiary hover:text-accent transition-colors inline-flex items-center gap-2"
+          className="text-primary dark:text-tertiary hover:text-accent transition-colors inline-flex items-center gap-2"
         >
           <svg
             className="w-5 h-5"

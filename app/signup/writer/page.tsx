@@ -44,7 +44,7 @@ function WriterSignupContent() {
       // Check if user is already a writer or owner
       if (profile?.role === "writer" || profile?.role === "owner") {
         setError(
-          `You are already ${profile.role === "owner" ? "an owner" : "a writer"}. No need to use an invite code.`
+          `You are already ${profile.role === "owner" ? "an owner" : "a writer"}. No need to use an invite code.`,
         );
         setValidating(false);
         return;
@@ -68,7 +68,7 @@ function WriterSignupContent() {
       await useInviteCode(
         invite.id!,
         user.uid,
-        user.displayName || user.email || "Unknown"
+        user.displayName || user.email || "Unknown",
       );
 
       setSuccess(true);
@@ -102,7 +102,7 @@ function WriterSignupContent() {
 
   if (!code) {
     return (
-      <div className="max-w-md mx-auto mt-12 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+      <div className="max-w-md mx-auto mt-12 bg-slate-200 dark:bg-gray-800 rounded-lg shadow-lg p-8">
         <h1 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">
           Invalid Link
         </h1>
@@ -122,7 +122,7 @@ function WriterSignupContent() {
 
   if (success) {
     return (
-      <div className="max-w-md mx-auto mt-12 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+      <div className="max-w-md mx-auto mt-12 bg-slate-200 dark:bg-gray-800 rounded-lg shadow-lg p-8">
         <div className="text-center">
           <div className="w-16 h-16 bg-tertiary rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
@@ -152,7 +152,7 @@ function WriterSignupContent() {
 
   if (!user) {
     return (
-      <div className="max-w-md mx-auto mt-12 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+      <div className="max-w-md mx-auto mt-12 bg-slate-200 dark:bg-gray-800 rounded-lg shadow-lg p-8">
         <h1 className="text-3xl font-bold text-primary dark:text-tertiary mb-4">
           Writer Invitation
         </h1>
@@ -200,7 +200,7 @@ function WriterSignupContent() {
 
   if (error) {
     return (
-      <div className="max-w-md mx-auto mt-12 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+      <div className="max-w-md mx-auto mt-12 bg-slate-200 dark:bg-gray-800 rounded-lg shadow-lg p-8">
         <h1 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">
           Error
         </h1>
