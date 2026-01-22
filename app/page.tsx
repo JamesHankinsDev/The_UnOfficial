@@ -292,7 +292,7 @@ export default function Home() {
       )}
       {/* Call to action and contact form for interested writers */}
 
-      <ContactForm />
+      {/* <ContactForm /> */}
     </div>
   );
 }

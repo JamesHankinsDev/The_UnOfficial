@@ -56,14 +56,14 @@ export default function AboutPage() {
       </div>
       {/* Call to action and contact form for interested writers */}
       <section className="mt-16 mb-8 p-6 bg-tertiary/10 dark:bg-tertiary/20 rounded-lg border border-tertiary/20 dark:border-tertiary/30 max-w-2xl mx-auto">
-        <h2 className="text-2xl font-bold mb-2 text-tertiary">
+        {/* <h2 className="text-2xl font-bold mb-2 text-tertiary">
           Interested in sharing your thoughts here too?
         </h2>
         <p className="mb-4 text-gray-700 dark:text-gray-200">
           Get in touch and we'll see if we're a good fit for you to post your
           own UnOfficial takes!
-        </p>
-        <ContactForm />
+        </p> */}
+        {/* <ContactForm /> */}
       </section>
     </>
   );
