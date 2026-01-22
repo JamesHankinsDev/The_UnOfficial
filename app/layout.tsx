@@ -6,6 +6,7 @@ import AuthProvider from "../components/AuthProvider";
 import IntroAnimation from "../components/IntroAnimation";
 import MuiSnackbarProvider from "../components/MuiSnackbar";
 import MuiAppProvider from "../components/MuiAppProvider.client";
+import ToastProvider from "../components/ToastProvider";
 
 export const metadata = {
   title: "The UnOfficial",
@@ -54,6 +55,7 @@ export default function RootLayout({
           <MuiSnackbarProvider>
             <AuthProvider>
               <IntroAnimation />
+              <ToastProvider />
               <div className="min-h-screen flex flex-col">
                 <NavBar />
                 <main className="flex-1 container mx-auto px-4 py-8">

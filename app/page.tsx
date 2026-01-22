@@ -18,6 +18,7 @@ import { Autoplay } from "swiper/modules";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import relativeTime from "dayjs/plugin/relativeTime";
+import ContactForm from "../components/ContactForm";
 dayjs.extend(isBetween);
 dayjs.extend(relativeTime);
 
@@ -157,6 +158,34 @@ export default function Home() {
   // Latest posts (already filtered for public)
   return (
     <div>
+      <section className="mb-8 p-6 bg-tertiary/10 dark:bg-tertiary/20 rounded-lg border border-tertiary/20 dark:border-tertiary/30">
+        <h1 className="text-3xl font-bold mb-2 text-tertiary">
+          Welcome to The UnOfficial!
+        </h1>
+        <p className="text-lg text-gray-700 dark:text-gray-200 ">
+          The UnOfficial is a grassroots home-brew platform dedicated to sharing
+          the stories around the NBA and the Basketball World. I'm glad you're
+          here.{" "}
+        </p>
+        <h3 className="text-xl font-bold my-4 text-tertiary">
+          THE VIBE CHECK (AKA: THE UNOFFICIAL EDITORIAL POLICY)
+        </h3>
+        <ul className="list-disc pl-6 space-y-2">
+          <li>
+            We’re here for clarity, not superiority. If you need a PhD to enjoy
+            the article, I failed.
+          </li>
+          <li>
+            Stats are seasoning, not the whole meal. Numbers are here to make
+            stories concrete, not to replace them. The tone stays human. If you
+            can’t read it out loud at a bar and feel normal, it’s too formal.
+          </li>
+          <li>
+            We respect the moment. When the league hands us a good storyline, we
+            don’t overcomplicate it. We just put it on the tape.
+          </li>
+        </ul>
+      </section>
       <h1 className="text-3xl font-semibold mb-6">Latest posts</h1>
       {loading ? (
         <p>Loading...</p>
@@ -193,7 +222,7 @@ export default function Home() {
 
           {whatsOnTheWay.length > 0 && (
             <div className="mb-10">
-              <h2 className="text-2xl font-bold mb-4 text-blue-600">
+              <h2 className="text-2xl font-bold mb-4 text-tertiary">
                 What's on the way
               </h2>
               <Swiper
@@ -261,6 +290,9 @@ export default function Home() {
           )}
         </>
       )}
+      {/* Call to action and contact form for interested writers */}
+
+      <ContactForm />
     </div>
   );
 }
