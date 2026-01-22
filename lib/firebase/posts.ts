@@ -30,6 +30,7 @@ export type Post = {
   publishedAt?: any;
   createdAt?: any;
   updatedAt?: any;
+  audioUrl?: string | null;
 };
 
 export type Comment = {
@@ -43,7 +44,7 @@ export type Comment = {
 };
 
 export async function createPost(
-  post: Omit<Post, "id" | "createdAt" | "updatedAt">
+  post: Omit<Post, "id" | "createdAt" | "updatedAt">,
 ) {
   if (!firestore) throw new Error("Firestore not initialized");
 
@@ -107,11 +108,11 @@ export async function getAllDrafts() {
   const q = query(
     postsRef,
     where("status", "==", "draft"),
-    orderBy("updatedAt", "desc")
+    orderBy("updatedAt", "desc"),
   );
   const snap = await getDocs(q);
 
-  return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Post));
+  return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Post);
 }
 
 export async function addComment(
@@ -119,7 +120,7 @@ export async function addComment(
   userId: string,
   userName: string,
   userEmail: string,
-  content: string
+  content: string,
 ) {
   if (!firestore) throw new Error("Firestore not initialized");
 
@@ -143,9 +144,9 @@ export async function getComments(postId: string) {
   const q = query(
     commentsRef,
     where("postId", "==", postId),
-    orderBy("createdAt", "asc")
+    orderBy("createdAt", "asc"),
   );
   const snap = await getDocs(q);
 
-  return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Comment));
+  return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Comment);
 }

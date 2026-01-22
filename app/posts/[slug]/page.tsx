@@ -122,6 +122,30 @@ export default function PostDetail({
         />
       )}
 
+      {post.audioUrl && (
+        <div className="mb-8 flex flex-col items-center">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="font-semibold text-lg text-primary dark:text-tertiary">
+              Listen to this story
+            </span>
+            <svg
+              className="w-6 h-6 text-tertiary animate-pulse"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 19V6l12-2v16l-12-2z"
+              />
+            </svg>
+          </div>
+          <audio controls src={post.audioUrl} className="w-full max-w-xl" />
+        </div>
+      )}
+
       <div className="prose prose-lg dark:prose-invert prose-gray dark:prose-gray max-w-none">
         <MarkdownRenderer content={post.content || ""} />
       </div>

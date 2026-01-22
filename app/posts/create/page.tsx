@@ -1,11 +1,12 @@
 "use client";
 import { useAuth } from "../../../components/AuthProvider";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import MarkdownRenderer from "../../../components/MarkdownRenderer";
 import { useSnackbar } from "../../../components/MuiSnackbar";
 import { createPost } from "../../../lib/firebase/posts";
+import { uploadPostAudio } from "../../../lib/firebase/storage";
 import { slugify } from "../../../lib/utils";
-
 
 export default function CreatePostPage() {
   const { user, profile, loading } = useAuth();
@@ -20,6 +21,50 @@ export default function CreatePostPage() {
     tags: "",
     status: "draft" as "draft" | "published",
   });
+
+  // Preview mode for reading while recording
+  const [isPreview, setIsPreview] = useState(false);
+
+  // Audio recording state
+  const [recording, setRecording] = useState(false);
+  const [audioURL, setAudioURL] = useState<string | null>(null);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunks = useRef<Blob[]>([]);
+
+  const handleStartRecording = async () => {
+    setIsPreview(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new window.MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunks.current = [];
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunks.current.push(e.data);
+      };
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks.current, { type: "audio/webm" });
+        setAudioBlob(blob);
+        setAudioURL(URL.createObjectURL(blob));
+      };
+      mediaRecorder.start();
+      setRecording(true);
+    } catch (err) {
+      showMessage("Microphone access denied or unavailable.", "error");
+    }
+  };
+
+  const handleStopRecording = () => {
+    mediaRecorderRef.current?.stop();
+    setRecording(false);
+    setIsPreview(false);
+  };
+
+  const handleDeleteAudio = () => {
+    setAudioBlob(null);
+    setAudioURL(null);
+    audioChunks.current = [];
+  };
 
   useEffect(() => {
     if (!loading && !user) {
@@ -74,6 +119,7 @@ export default function CreatePostPage() {
     setSaving(true);
     try {
       const slug = slugify(formData.title);
+      // Create the post first to get the postId
       const postId = await createPost({
         title: formData.title,
         slug,
@@ -86,7 +132,22 @@ export default function CreatePostPage() {
         tags: formData.tags
           ? formData.tags.split(",").map((t) => t.trim())
           : [],
+        audioUrl: null,
       });
+
+      // If there is an audio recording, upload it and update the post
+      if (audioBlob) {
+        try {
+          const audioUrl = await uploadPostAudio(postId, audioBlob);
+          await fetch("/api/posts/update-audio", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ postId, audioUrl }),
+          });
+        } catch (err) {
+          showMessage("Audio upload failed, but post was created.", "warning");
+        }
+      }
 
       // If publishing (not draft), send notifications to subscribers
       if (formData.status === "published") {
@@ -135,7 +196,70 @@ export default function CreatePostPage() {
           Create New Post
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Audio Recording Section - always visible */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+            Optional: Record Audio for this Article
+          </label>
+          <div className="flex flex-col gap-2">
+            {audioURL ? (
+              <div className="flex flex-col gap-2">
+                <audio controls src={audioURL} className="w-full" />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleDeleteAudio}
+                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                  >
+                    Delete Audio
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={recording ? handleStopRecording : handleStartRecording}
+                className={`px-4 py-2 rounded text-white font-medium transition-all ${recording ? "bg-yellow-500 hover:bg-yellow-600" : "bg-blue-600 hover:bg-blue-700"}`}
+              >
+                {recording ? "Stop Recording" : "Start Recording"}
+              </button>
+            )}
+            {recording && (
+              <span className="text-xs text-yellow-600 font-semibold animate-pulse">
+                ● Recording... Speak now!
+              </span>
+            )}
+          </div>
+        </div>
+
+        {isPreview ? (
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-xl font-semibold">
+                Preview Mode (for Recording)
+              </h2>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsPreview(false);
+                  if (recording) handleStopRecording();
+                }}
+                className="text-blue-600 underline"
+              >
+                Back to Edit
+              </button>
+            </div>
+            <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
+              <MarkdownRenderer
+                content={formData.content || "Nothing to preview yet."}
+              />
+            </div>
+          </div>
+        ) : null}
+        <form
+          onSubmit={handleSubmit}
+          className={`space-y-6${isPreview ? " hidden" : ""}`}
+        >
           <div>
             <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
               Title *
