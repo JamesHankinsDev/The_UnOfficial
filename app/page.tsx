@@ -324,6 +324,13 @@ export default function Home() {
                       return (
                         <div className="flex h-full" key={p.id}>
                           <article className="bg-primary.main dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700 w-full">
+                            {/* Navigation disabled until publish date/time */}
+                            <button
+                              className="mb-4 px-4 py-2 rounded bg-tertiary text-primary cursor-not-allowed w-auto"
+                              disabled
+                            >
+                              Available {release.fromNow()}
+                            </button>
                             <h2 className="text-2xl font-bold text-primary dark:text-tertiary mb-3">
                               {p.title}
                             </h2>
@@ -340,13 +347,6 @@ export default function Home() {
                                 </time>
                               )}
                             </div>
-                            {/* Navigation disabled until publish date/time */}
-                            <button
-                              className="mt-4 px-4 py-2 rounded bg-gray-300 text-gray-600 cursor-not-allowed opacity-60 w-auto"
-                              disabled
-                            >
-                              Available {release.fromNow()}
-                            </button>
                           </article>
                         </div>
                       );
