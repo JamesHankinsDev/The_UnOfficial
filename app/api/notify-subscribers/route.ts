@@ -163,13 +163,6 @@ export async function POST(request: NextRequest) {
     ).length;
     const smsFailed = smsResults.filter((r) => r.status === "rejected").length;
 
-    console.log(
-      `Email notifications: ${emailSuccessful} successful, ${emailFailed} failed`,
-    );
-    console.log(
-      `SMS notifications: ${smsSuccessful} successful, ${smsFailed} failed`,
-    );
-
     return NextResponse.json({
       message: "Notifications sent",
       email: {

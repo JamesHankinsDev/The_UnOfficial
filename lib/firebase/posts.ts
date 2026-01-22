@@ -31,6 +31,7 @@ export type Post = {
   createdAt?: any;
   updatedAt?: any;
   audioUrl?: string | null;
+  releaseDate?: any; // Timestamp or Date
 };
 
 export type Comment = {
@@ -54,8 +55,8 @@ export async function createPost(
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
     publishedAt: post.status === "published" ? serverTimestamp() : null,
+    ...(post.releaseDate ? { releaseDate: post.releaseDate } : {}),
   });
-
   return docRef.id;
 }
 
@@ -67,6 +68,7 @@ export async function updatePost(postId: string, updates: Partial<Post>) {
     ...updates,
     updatedAt: serverTimestamp(),
     ...(updates.status === "published" && { publishedAt: serverTimestamp() }),
+    ...(updates.releaseDate ? { releaseDate: updates.releaseDate } : {}),
   });
 }
 

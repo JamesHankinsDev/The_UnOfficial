@@ -44,26 +44,6 @@ export default function IntroAnimation() {
         >
           <Logo className="w-48 h-48 md:w-64 md:h-64" />
         </div>
-
-        {/* Text overlay */}
-        <div
-          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-700 ${
-            stage === "fade-in" ? "opacity-0" : "opacity-100"
-          }`}
-        >
-          <div className="text-center">
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 tracking-tight">
-              The UnOfficial
-            </h1>
-            <div className="flex items-center justify-center gap-2">
-              <div className="w-12 h-0.5 bg-white/50"></div>
-              <p className="text-xl md:text-2xl text-white/90 font-light">
-                Serious Fans, Unserious Takes
-              </p>
-              <div className="w-12 h-0.5 bg-white/50"></div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

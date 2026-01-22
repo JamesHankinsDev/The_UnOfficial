@@ -44,7 +44,14 @@ export default function Home() {
         id: d.id,
         ...(d.data() as any),
       }));
-      setPosts(items);
+      // Filter out posts with a future releaseDate
+      const now = new Date();
+      const filtered = items.filter((p: any) => {
+        if (!p.releaseDate) return true;
+        if (p.releaseDate.toDate) return p.releaseDate.toDate() <= now;
+        return new Date(p.releaseDate) <= now;
+      });
+      setPosts(filtered);
       setLoading(false);
     }
     load();

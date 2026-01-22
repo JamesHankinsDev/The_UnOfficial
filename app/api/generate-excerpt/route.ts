@@ -24,7 +24,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("Generating excerpt with OpenAI...");
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [

@@ -2,6 +2,7 @@
 import { useAuth } from "../../../components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
+import dayjs from "dayjs";
 import MarkdownRenderer from "../../../components/MarkdownRenderer";
 import { useSnackbar } from "../../../components/MuiSnackbar";
 import { createPost } from "../../../lib/firebase/posts";
@@ -20,6 +21,7 @@ export default function CreatePostPage() {
     excerpt: "",
     tags: "",
     status: "draft" as "draft" | "published",
+    releaseDate: "", // ISO string or empty
   });
 
   // Preview mode for reading while recording
@@ -133,6 +135,7 @@ export default function CreatePostPage() {
           ? formData.tags.split(",").map((t) => t.trim())
           : [],
         audioUrl: null,
+        ...(formData.releaseDate ? { releaseDate: new Date(formData.releaseDate) } : {}),
       });
 
       // If there is an audio recording, upload it and update the post
@@ -354,6 +357,21 @@ export default function CreatePostPage() {
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-tertiary focus:border-transparent"
               placeholder="basketball, nba, sports"
             />
+          </div>
+
+          {/* Release Date Picker */}
+          <div>
+            <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+              Release Date (optional)
+            </label>
+            <input
+              type="datetime-local"
+              value={formData.releaseDate}
+              onChange={e => setFormData({ ...formData, releaseDate: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-tertiary focus:border-transparent"
+              min={dayjs().format("YYYY-MM-DDTHH:mm")}
+            />
+            <p className="text-xs text-gray-500 mt-1">Leave blank to publish immediately.</p>
           </div>
 
           <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">

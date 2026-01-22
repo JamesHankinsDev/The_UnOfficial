@@ -23,7 +23,14 @@ export default function PostDetail({
       try {
         const postData = await getPostBySlug(slug);
 
-        if (!postData || postData.status !== "published") {
+        const now = new Date();
+        if (
+          !postData ||
+          postData.status !== "published" ||
+          (postData.releaseDate &&
+            ((postData.releaseDate.toDate && postData.releaseDate.toDate() > now) ||
+              (!postData.releaseDate.toDate && new Date(postData.releaseDate) > now)))
+        ) {
           setPost(null);
         } else {
           setPost(postData);

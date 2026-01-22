@@ -2,6 +2,7 @@
 import { useAuth } from "../../../../components/AuthProvider";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
+import dayjs from "dayjs";
 import MarkdownRenderer from "../../../../components/MarkdownRenderer";
 import { useSnackbar } from "../../../../components/MuiSnackbar";
 import {
@@ -33,6 +34,7 @@ export default function EditPostPage() {
     excerpt: "",
     tags: "",
     status: "draft" as "draft" | "published" | "archived",
+    releaseDate: "", // ISO string or empty
   });
 
   // Audio recording state
@@ -106,6 +108,7 @@ export default function EditPostPage() {
           excerpt: postData.excerpt || "",
           tags: postData.tags?.join(", ") || "",
           status: postData.status,
+          releaseDate: postData.releaseDate ? dayjs(postData.releaseDate.toDate ? postData.releaseDate.toDate() : postData.releaseDate).format("YYYY-MM-DDTHH:mm") : "",
         });
       } catch (error) {
         console.error("Error loading post:", error);
@@ -183,6 +186,7 @@ export default function EditPostPage() {
           ? formData.tags.split(",").map((t) => t.trim())
           : [],
         ...(audioUrl ? { audioUrl } : {}),
+        ...(formData.releaseDate ? { releaseDate: new Date(formData.releaseDate) } : {}),
       });
 
       // If changing from draft/archived to published, send notifications
@@ -421,6 +425,21 @@ export default function EditPostPage() {
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-tertiary focus:border-transparent"
               placeholder="basketball, nba, sports"
             />
+          </div>
+
+          {/* Release Date Picker */}
+          <div>
+            <label className="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+              Release Date (optional)
+            </label>
+            <input
+              type="datetime-local"
+              value={formData.releaseDate}
+              onChange={e => setFormData({ ...formData, releaseDate: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-tertiary focus:border-transparent"
+              min={dayjs().format("YYYY-MM-DDTHH:mm")}
+            />
+            <p className="text-xs text-gray-500 mt-1">Leave blank to publish immediately.</p>
           </div>
 
           <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">

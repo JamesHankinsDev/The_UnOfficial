@@ -21,7 +21,7 @@ export default function PostsPage() {
       const q = query(
         collection(firestore, "posts"),
         where("status", "==", "published"),
-        orderBy("publishedAt", "desc")
+        orderBy("publishedAt", "desc"),
       );
       const snap = await getDocs(q);
       const items = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
@@ -45,7 +45,14 @@ export default function PostsPage() {
     const matchesTag = selectedTag
       ? (p.tags || []).includes(selectedTag)
       : true;
-    return matchesSearch && matchesTag;
+    // Hide posts with a future releaseDate
+    const now = new Date();
+    const isReleased =
+      !p.releaseDate ||
+      (p.releaseDate.toDate && p.releaseDate.toDate() <= now) ||
+      (!p.releaseDate.toDate && new Date(p.releaseDate) <= now);
+
+    return matchesSearch && matchesTag && isReleased;
   });
 
   return (
