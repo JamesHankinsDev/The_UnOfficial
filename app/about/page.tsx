@@ -1,6 +1,6 @@
 "use client";
 import Logo from "../../components/Logo";
-import ContactForm from "../../components/ContactForm";
+// import ContactForm from "../../components/ContactForm";
 
 export default function AboutPage() {
   return (

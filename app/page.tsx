@@ -18,7 +18,7 @@ import { Autoplay } from "swiper/modules";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import relativeTime from "dayjs/plugin/relativeTime";
-import ContactForm from "../components/ContactForm";
+// import ContactForm from "../components/ContactForm";
 dayjs.extend(isBetween);
 dayjs.extend(relativeTime);
 
