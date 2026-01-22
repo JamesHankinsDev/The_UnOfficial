@@ -343,7 +343,7 @@ export default function Home() {
                               </span>
                               {p.releaseDate && (
                                 <time className="text-gray-500 dark:text-gray-500">
-                                  {release.format("MMM D, YYYY h:mm A")}
+                                  {release.format("MMM D, YYYY")}
                                 </time>
                               )}
                             </div>
