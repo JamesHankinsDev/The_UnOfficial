@@ -6,6 +6,44 @@ import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import { firestore } from "../../lib/firebase/client";
 import type { Post } from "../../lib/firebase/posts";
 import { updatePost, getAllDrafts } from "../../lib/firebase/posts";
+import toast from "react-hot-toast";
+// Helper to check if a post is eligible for notification
+function canNotify(post) {
+  if (post.status !== "published") return false;
+  if (!post.releaseDate) return false;
+  const now = new Date();
+  let release;
+  if (post.releaseDate.toDate) {
+    release = post.releaseDate.toDate();
+  } else if (post.releaseDate.seconds) {
+    release = new Date(post.releaseDate.seconds * 1000);
+  } else {
+    release = new Date(post.releaseDate);
+  }
+  return release <= now;
+}
+
+async function notifySubscribers(post) {
+  try {
+    const res = await fetch("/api/notify-subscribers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        postTitle: post.title,
+        postSlug: post.slug,
+        authorName: post.authorName,
+      }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      toast.success("Subscribers notified!");
+    } else {
+      toast.error(data.error || "Failed to notify subscribers.");
+    }
+  } catch (err) {
+    toast.error("Failed to notify subscribers.");
+  }
+}
 import {
   generateInviteCode,
   getInviteCodes,
@@ -532,6 +570,14 @@ export default function DashboardPage() {
                         >
                           {unpublishing === post.id ? "..." : "Unpublish"}
                         </button>
+                        {canNotify(post) && (
+                          <button
+                            onClick={() => notifySubscribers(post)}
+                            className="flex-1 sm:flex-none px-3 py-1 text-sm bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors whitespace-nowrap"
+                          >
+                            Notify Subscribers
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

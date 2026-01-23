@@ -33,7 +33,10 @@ export async function POST(request: NextRequest) {
     const normalizedEmail = email.trim().toLowerCase();
     const subscribersRef = collection(firestore, "subscribers");
     // Query for existing subscriber by normalized email
-    const q = query(subscribersRef, where("normalizedEmail", "==", normalizedEmail));
+    const q = query(
+      subscribersRef,
+      where("normalizedEmail", "==", normalizedEmail),
+    );
     const snapshot = await getDocs(q);
     if (!snapshot.empty) {
       // Already subscribed, update to ensure 'subscribed: true'
@@ -43,7 +46,10 @@ export async function POST(request: NextRequest) {
         { email, normalizedEmail, subscribed: true },
         { merge: true },
       );
-      return NextResponse.json({ error: "You're already subscribed!" }, { status: 400 });
+      return NextResponse.json(
+        { error: "You're already subscribed!" },
+        { status: 400 },
+      );
     } else {
       // New subscriber
       const newDoc = doc(subscribersRef);

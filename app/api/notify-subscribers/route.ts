@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       for (const email of emailSubscribers) {
         emailPromises.push(
           resend.emails.send({
-            from: "The UnOfficial <notifications@theunofficial.blog>",
+            from: "The UnOfficial <notifications@the-un-official.com>",
             to: email,
             subject: `New Article: ${postTitle}`,
             html: `
