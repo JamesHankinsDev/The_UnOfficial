@@ -1,4 +1,5 @@
 import ShopifyBuyButton from "../../components/ShopifyBuyButton";
+import SubscribeForm from "../../components/SubscribeForm";
 
 export default function MerchPage() {
   return (
@@ -19,6 +20,9 @@ export default function MerchPage() {
       <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
         Questions? Contact us for support or sizing info.
       </p>
+      <div className="mt-10">
+        <SubscribeForm />
+      </div>
     </div>
   );
 }

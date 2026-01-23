@@ -4,11 +4,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import { firestore } from "../../lib/firebase/client";
-import type { Post } from "../../lib/firebase/posts";
 import { updatePost, getAllDrafts } from "../../lib/firebase/posts";
 import toast from "react-hot-toast";
 // Helper to check if a post is eligible for notification
-function canNotify(post) {
+import type { Post } from "../../lib/firebase/posts";
+function canNotify(post: Post) {
   if (post.status !== "published") return false;
   if (!post.releaseDate) return false;
   const now = new Date();
@@ -23,7 +23,7 @@ function canNotify(post) {
   return release <= now;
 }
 
-async function notifySubscribers(post) {
+async function notifySubscribers(post: Post) {
   try {
     const res = await fetch("/api/notify-subscribers", {
       method: "POST",

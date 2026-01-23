@@ -1,9 +1,26 @@
-import { useState } from "react";
+"use client";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+
+import { getNextScheduledPost } from "../lib/firebase/nextPost";
 
 export default function SubscribeForm() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading">("idle");
+  const [nextPost, setNextPost] = useState<any | null>(null);
+
+  useEffect(() => {
+    async function fetchNext() {
+      try {
+        // Use now as the reference for the next post
+        const next = await getNextScheduledPost(new Date());
+        setNextPost(next);
+      } catch {
+        setNextPost(null);
+      }
+    }
+    fetchNext();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,15 +49,32 @@ export default function SubscribeForm() {
     }
   };
 
+  const daysToNextRelease = nextPost == null ? null : Math.floor(
+    (new Date(
+      nextPost.releaseDate?.toDate
+        ? nextPost.releaseDate.toDate()
+        : nextPost.releaseDate,
+    ).getTime() -
+      Date.now()) /
+      (1000 * 60 * 60 * 24),
+  );
+
   return (
-    <>
-      <p>
-        Interested in staying in the loop when new articles release? Subscribe
-        for updates to be the first to know!
-      </p>
+    <div className="mb-8 p-6 bg-tertiary/10 dark:bg-tertiary/20 rounded-lg shadow text-center max-w-xl mx-auto">
+      <h3 className="text-xl font-semibold mb-2 text-primary dark:text-tertiary">
+        Ready for more?
+      </h3>
+      {nextPost && (
+        <div className="mb-2 text-center text-base text-gray-700 dark:text-gray-300">
+          The next article, <span className="font-bold">{nextPost.title}</span>,
+          drops in{" "}
+          {daysToNextRelease === 1 ? "a day" : `${daysToNextRelease} days`}.
+          Subscribe to updates to make sure you don't miss it!
+        </div>
+      )}
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col sm:flex-row items-center gap-2 bg-white/80 dark:bg-gray-900/80 p-4 text-primary bold rounded-lg shadow max-w-xl mx-auto mt-4"
+        className="flex flex-col sm:flex-row items-center gap-2 justify-center mt-4"
       >
         <input
           type="email"
@@ -60,6 +94,6 @@ export default function SubscribeForm() {
           {status === "loading" ? "Subscribing..." : "Subscribe"}
         </button>
       </form>
-    </>
+    </div>
   );
 }

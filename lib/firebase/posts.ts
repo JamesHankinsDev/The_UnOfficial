@@ -31,6 +31,7 @@ export type Post = {
   createdAt?: any;
   updatedAt?: any;
   audioUrl?: string | null;
+  audioDuration?: number | null;
   releaseDate?: any; // Timestamp or Date
 };
 

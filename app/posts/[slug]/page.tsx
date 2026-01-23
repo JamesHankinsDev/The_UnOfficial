@@ -3,6 +3,7 @@ import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getPostBySlug } from "../../../lib/firebase/posts";
 import type { Post } from "../../../lib/firebase/posts";
+import { getNextScheduledPost } from "../../../lib/firebase/nextPost";
 import MarkdownRenderer from "../../../components/MarkdownRenderer";
 import SubscribeForm from "../../../components/SubscribeForm";
 
@@ -13,6 +14,7 @@ export default function PostDetail({
 }) {
   const { slug } = use(params);
   const [post, setPost] = useState<Post | null>(null);
+  const [nextPost, setNextPost] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -23,7 +25,6 @@ export default function PostDetail({
       setError(null);
       try {
         const postData = await getPostBySlug(slug);
-
         const now = new Date();
         if (
           !postData ||
@@ -37,6 +38,14 @@ export default function PostDetail({
           setPost(null);
         } else {
           setPost(postData);
+          // Fetch next scheduled post
+          let releaseDate = postData.releaseDate;
+          if (releaseDate?.toDate) releaseDate = releaseDate.toDate();
+          else if (releaseDate?.seconds)
+            releaseDate = new Date(releaseDate.seconds * 1000);
+          else releaseDate = new Date(releaseDate);
+          const next = await getNextScheduledPost(releaseDate);
+          setNextPost(next);
         }
       } catch (err) {
         console.error("Error loading post:", err);
@@ -93,13 +102,28 @@ export default function PostDetail({
     }).format(date);
   };
 
+  // Calculate read time (average 200 words/minute)
+  const getReadTime = (text: string) => {
+    if (!text) return 1;
+    const words = text.trim().split(/\s+/).length;
+    return Math.max(1, Math.round(words / 200));
+  };
+  // Listen time: try to get from post.audioDuration (in seconds), else null
+  const getListenTime = (audioDuration?: number | null) => {
+    if (!audioDuration) return null;
+    return Math.max(1, Math.round(audioDuration / 60));
+  };
+
+  const readTime = getReadTime(post.content || "");
+  const listenTime = getListenTime(post.audioDuration);
+
   return (
     <article className="max-w-4xl mx-auto">
       <header className="mb-8">
         <h1 className="text-4xl md:text-5xl font-bold text-primary dark:text-tertiary mb-4">
           {post.title}
         </h1>
-        <div className="flex items-center gap-4 text-gray-600 dark:text-gray-400">
+        <div className="flex flex-wrap items-center gap-4 text-gray-600 dark:text-gray-400">
           <span className="font-medium text-gray-900 dark:text-gray-100">
             By {post.authorName}
           </span>
@@ -108,6 +132,40 @@ export default function PostDetail({
               <span>•</span>
               <time>{formatDate(post.publishedAt)}</time>
             </>
+          )}
+          <span className="flex items-center gap-1">
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3"
+              />
+            </svg>
+            {readTime} min read
+          </span>
+          {listenTime && (
+            <span className="flex items-center gap-1">
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 19V6l12-2v16l-12-2z"
+                />
+              </svg>
+              {listenTime} min listen
+            </span>
           )}
         </div>
         {post.tags && post.tags.length > 0 && (
@@ -124,10 +182,7 @@ export default function PostDetail({
         )}
       </header>
 
-      {/* Subscribe CTA at the top of each article */}
-      <div className="mb-8">
-        <SubscribeForm />
-      </div>
+      {/* Subscribe CTA removed from top of article */}
 
       {post.coverImage && (
         <img
@@ -166,6 +221,11 @@ export default function PostDetail({
       </div>
 
       <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+        {nextPost ? (
+          <div className="mt-4 flex justify-center">
+            <SubscribeForm />
+          </div>
+        ) : null}
         <a
           href="/posts"
           className="text-primary dark:text-tertiary hover:text-accent transition-colors inline-flex items-center gap-2"

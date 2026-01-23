@@ -10,6 +10,19 @@ export default function PostCard({ post }: { post: any }) {
       year: "numeric",
     }).format(date);
   };
+  // Read time (200 wpm)
+  const getReadTime = (text: string) => {
+    if (!text) return 1;
+    const words = text.trim().split(/\s+/).length;
+    return Math.max(1, Math.round(words / 200));
+  };
+  // Listen time (audioDuration in seconds)
+  const getListenTime = (audioDuration?: number | null) => {
+    if (!audioDuration) return null;
+    return Math.max(1, Math.round(audioDuration / 60));
+  };
+  const readTime = getReadTime(post.content || "");
+  const listenTime = getListenTime(post.audioDuration);
 
   return (
     <article className="bg-slate-200/40 dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border border-primary dark:border-gray-700">
@@ -33,6 +46,42 @@ export default function PostCard({ post }: { post: any }) {
           <time className="text-gray-800 dark:text-gray-500">
             {formatDate(post.publishedAt)}
           </time>
+        )}
+      </div>
+      <div className="flex gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+        <span className="flex items-center gap-1">
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4l3 3"
+            />
+          </svg>
+          {readTime} min read
+        </span>
+        {listenTime && (
+          <span className="flex items-center gap-1">
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 19V6l12-2v16l-12-2z"
+              />
+            </svg>
+            {listenTime} min listen
+          </span>
         )}
       </div>
 
