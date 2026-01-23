@@ -10,7 +10,10 @@ import {
   updatePost,
   deletePost,
 } from "../../../../lib/firebase/posts";
-import { uploadPostAudio, deletePostAudio } from "../../../../lib/firebase/storage";
+import {
+  uploadPostAudio,
+  deletePostAudio,
+} from "../../../../lib/firebase/storage";
 import type { Post } from "../../../../lib/firebase/posts";
 import { slugify } from "../../../../lib/utils";
 

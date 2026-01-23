@@ -10,6 +10,7 @@ import {
 } from "firebase/firestore";
 import { firestore } from "../lib/firebase/client";
 import PostCard from "../components/PostCard";
+import SubscribeForm from "../components/SubscribeForm";
 import { Swiper, SwiperSlide } from "swiper/react";
 import SwiperCore from "swiper";
 import "swiper/css";
@@ -226,7 +227,10 @@ export default function Home() {
           </ul>
         </section>
       )}
-      <h1 className="text-3xl font-semibold mb-6">Latest posts</h1>
+      {/* Subscribe CTA above the fold */}
+      <div className="mb-6">
+        <SubscribeForm />
+      </div>
       {loading ? (
         <p>Loading...</p>
       ) : (

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { getPostBySlug } from "../../../lib/firebase/posts";
 import type { Post } from "../../../lib/firebase/posts";
 import MarkdownRenderer from "../../../components/MarkdownRenderer";
+import SubscribeForm from "../../../components/SubscribeForm";
 
 export default function PostDetail({
   params,
@@ -122,6 +123,11 @@ export default function PostDetail({
           </div>
         )}
       </header>
+
+      {/* Subscribe CTA at the top of each article */}
+      <div className="mb-8">
+        <SubscribeForm />
+      </div>
 
       {post.coverImage && (
         <img

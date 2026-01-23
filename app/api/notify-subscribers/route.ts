@@ -42,52 +42,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get all users with email notifications enabled
-    const usersRef = collection(firestore, "users");
+    // Get all subscribers with email notifications enabled
+    const subscribersRef = collection(firestore, "subscribers");
     const emailQuery = query(
-      usersRef,
-      where("notificationPreferences.emailNotifications", "==", true),
+      subscribersRef,
+      where("subscribed", "==", true),
+      where("email", "!=", null),
     );
-    const smsQuery = query(
-      usersRef,
-      where("notificationPreferences.smsNotifications", "==", true),
-    );
-
-    const [emailSnapshot, smsSnapshot] = await Promise.all([
-      getDocs(emailQuery),
-      getDocs(smsQuery),
-    ]);
+    const emailSnapshot = await getDocs(emailQuery);
 
     const emailPromises: Promise<any>[] = [];
-    const smsPromises: Promise<any>[] = [];
     const emailSubscribers: string[] = [];
-    const smsSubscribers: string[] = [];
 
     // Collect email subscribers
     emailSnapshot.forEach((doc) => {
-      const userData = doc.data();
-      if (userData.email) {
-        emailSubscribers.push(userData.email);
+      const subscriberData = doc.data();
+      if (subscriberData.email) {
+        emailSubscribers.push(subscriberData.email);
       }
     });
 
-    // Collect SMS subscribers
-    smsSnapshot.forEach((doc) => {
-      const userData = doc.data();
-      if (
-        userData.notificationPreferences?.phoneNumber &&
-        userData.notificationPreferences?.smsNotifications
-      ) {
-        smsSubscribers.push(userData.notificationPreferences.phoneNumber);
-      }
-    });
+    // (Optional) If you want to support SMS, add phoneNumber to subscriber doc and query here
+    // const smsQuery = query(
+    //   subscribersRef,
+    //   where("subscribed", "==", true),
+    //   where("phoneNumber", "!=", null)
+    // );
+    // const smsSnapshot = await getDocs(smsQuery);
+    // const smsSubscribers: string[] = [];
+    // smsSnapshot.forEach((doc) => {
+    //   const subscriberData = doc.data();
+    //   if (subscriberData.phoneNumber) {
+    //     smsSubscribers.push(subscriberData.phoneNumber);
+    //   }
+    // });
+    const smsSubscribers: string[] = []; // Remove if not supporting SMS
+    const smsPromises: Promise<any>[] = []; // Remove if not supporting SMS
 
     // Send emails
     if (emailSubscribers.length > 0 && process.env.RESEND_API_KEY) {
       for (const email of emailSubscribers) {
         emailPromises.push(
           resend.emails.send({
-            from: "The UnOfficial <notifications@theunofficial.blog>", // Update with your verified domain
+            from: "The UnOfficial <notifications@theunofficial.blog>",
             to: email,
             subject: `New Article: ${postTitle}`,
             html: `
@@ -129,22 +126,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Send SMS messages
-    if (
-      smsSubscribers.length > 0 &&
-      twilioClient &&
-      process.env.TWILIO_PHONE_NUMBER
-    ) {
-      for (const phoneNumber of smsSubscribers) {
-        smsPromises.push(
-          twilioClient.messages.create({
-            body: `📰 New article published on The UnOfficial: "${postTitle}" by ${authorName}. Read now: ${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/posts/${postSlug}`,
-            from: process.env.TWILIO_PHONE_NUMBER,
-            to: phoneNumber,
-          }),
-        );
-      }
-    }
+    // (Optional) Send SMS messages if supporting phone numbers in subscribers
+    // if (
+    //   smsSubscribers.length > 0 &&
+    //   twilioClient &&
+    //   process.env.TWILIO_PHONE_NUMBER
+    // ) {
+    //   for (const phoneNumber of smsSubscribers) {
+    //     smsPromises.push(
+    //       twilioClient.messages.create({
+    //         body: `📰 New article published on The UnOfficial: "${postTitle}" by ${authorName}. Read now: ${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/posts/${postSlug}`,
+    //         from: process.env.TWILIO_PHONE_NUMBER,
+    //         to: phoneNumber,
+    //       }),
+    //     );
+    //   }
+    // }
 
     // Wait for all notifications to be sent
     const [emailResults, smsResults] = await Promise.all([
