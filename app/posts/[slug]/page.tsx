@@ -180,6 +180,39 @@ export default function PostDetail({
             ))}
           </div>
         )}
+        {/* Share button */}
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            className="flex items-center gap-2 px-3 py-1 bg-primary text-white rounded hover:bg-accent transition-colors text-sm"
+            onClick={async () => {
+              const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+              const shareData = {
+                title: post.title,
+                text: post.excerpt || post.title,
+                url: shareUrl,
+              };
+              if (navigator.share) {
+                try {
+                  await navigator.share(shareData);
+                } catch {}
+              } else if (navigator.clipboard) {
+                try {
+                  await navigator.clipboard.writeText(shareUrl);
+                  alert("Link copied to clipboard!");
+                } catch {
+                  alert("Failed to copy link.");
+                }
+              } else {
+                alert("Sharing not supported on this device.");
+              }
+            }}
+            aria-label="Share this article"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 6l-4-4-4 4m4-4v16" /></svg>
+            Share
+          </button>
+        </div>
       </header>
 
       {/* Subscribe CTA removed from top of article */}
