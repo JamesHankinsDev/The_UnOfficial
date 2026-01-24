@@ -1,35 +1,14 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
-import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
-import { firestore } from "../../lib/firebase/client";
+import { useMemo, useState } from "react";
+import { usePosts } from "../../lib/usePosts";
 import PostCard from "../../components/PostCard";
 
 export default function PostsPage() {
-  const [posts, setPosts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { posts, loading } = usePosts();
   const [search, setSearch] = useState("");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function load() {
-      setLoading(true);
-      if (!firestore) {
-        setPosts([]);
-        setLoading(false);
-        return;
-      }
-      const q = query(
-        collection(firestore, "posts"),
-        where("status", "==", "published"),
-        orderBy("publishedAt", "desc"),
-      );
-      const snap = await getDocs(q);
-      const items = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
-      setPosts(items);
-      setLoading(false);
-    }
-    load();
-  }, []);
+  // ...existing code...
 
   const tags = useMemo(() => {
     const s = new Set<string>();

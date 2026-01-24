@@ -1,14 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import {
-  collection,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  limit,
-} from "firebase/firestore";
-import { firestore } from "../lib/firebase/client";
+import { useState } from "react";
+import { usePosts } from "../lib/usePosts";
 import PostCard from "../components/PostCard";
 import SubscribeForm from "../components/SubscribeForm";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -37,37 +29,11 @@ type Post = {
 export default function Home() {
   SwiperCore.use([Autoplay]);
   const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { posts, loading } = usePosts();
   // 0 = What's New, 1 = What's on the way
   const [openSection, setOpenSection] = useState<0 | 1>(0);
 
-  useEffect(() => {
-    async function load() {
-      setLoading(true);
-      if (!firestore) {
-        // Firestore not configured; skip loading posts during local dev
-        setPosts([]);
-        setLoading(false);
-        return;
-      }
-      const q = query(
-        collection(firestore, "posts"),
-        where("status", "==", "published"),
-        orderBy("publishedAt", "desc"),
-        limit(30),
-      );
-      const snap = await getDocs(q);
-      const items: Post[] = snap.docs.map((d) => ({
-        id: d.id,
-        ...(d.data() as any),
-      }));
-      // Filter out posts with a future releaseDate
-      setPosts(items);
-      setLoading(false);
-    }
-    load();
-  }, []);
+  // ...existing code...
 
   // Date helpers
   const today = dayjs();
@@ -103,6 +69,8 @@ export default function Home() {
         : dayjs(b.publishedAt);
       return bDate.valueOf() - aDate.valueOf();
     });
+
+  console.log("Posts: ", posts);
 
   // What's to come: releaseDate in the future and not already published
   const whatsOnTheWay = posts
@@ -152,6 +120,8 @@ export default function Home() {
       }
       return aDate.valueOf() - bDate.valueOf();
     });
+
+  console.log("Whats on the way", whatsOnTheWay);
 
   // Remove posts that are already in 'What's New' or 'What's on the way' from the main list
   const whatsNewIds = new Set(whatsNew.map((p) => p.id));

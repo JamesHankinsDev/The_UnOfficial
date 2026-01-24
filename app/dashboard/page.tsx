@@ -2,8 +2,7 @@
 import { useAuth } from "../../components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
-import { firestore } from "../../lib/firebase/client";
+import { usePosts } from "../../lib/usePosts";
 import { updatePost, getAllDrafts } from "../../lib/firebase/posts";
 import toast from "react-hot-toast";
 // Helper to check if a post is eligible for notification
@@ -53,12 +52,40 @@ import {
 export default function DashboardPage() {
   const { user, profile, loading, signOut } = useAuth();
   const router = useRouter();
-  const [drafts, setDrafts] = useState<Post[]>([]);
-  const [loadingDrafts, setLoadingDrafts] = useState(true);
-  const [allDrafts, setAllDrafts] = useState<Post[]>([]);
-  const [loadingAllDrafts, setLoadingAllDrafts] = useState(true);
-  const [publishedPosts, setPublishedPosts] = useState<Post[]>([]);
-  const [loadingPublished, setLoadingPublished] = useState(true);
+  // Fetch published posts for this user
+  const { posts: publishedPosts, loading: loadingPublished } = usePosts({
+    status: "published",
+    orderByField: "publishedAt",
+    orderDirection: "desc",
+    filterFutureRelease: false,
+  });
+  // Fetch drafts for this user
+  const { posts: drafts, loading: loadingDrafts } = usePosts({
+    status: "draft",
+    orderByField: "updatedAt",
+    orderDirection: "desc",
+    filterFutureRelease: false,
+  });
+  // Team drafts: all drafts not authored by the current user
+  const {
+    posts: allDrafts,
+    loading: loadingAllDrafts,
+  } = usePosts({
+    status: "draft",
+    orderByField: "updatedAt",
+    orderDirection: "desc",
+    filterFutureRelease: false,
+    customQueryBuilder: (colRef) => {
+      if (!user) return query(colRef, where("status", "==", "draft"));
+      return query(
+        colRef,
+        where("status", "==", "draft"),
+        where("authorId", "!=", user.uid),
+        orderBy("authorId"),
+        orderBy("updatedAt", "desc")
+      );
+    },
+  });
   const [unpublishing, setUnpublishing] = useState<string | null>(null);
   const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([]);
   const [loadingInvites, setLoadingInvites] = useState(false);
@@ -71,98 +98,7 @@ export default function DashboardPage() {
     }
   }, [user, loading, router]);
 
-  useEffect(() => {
-    async function loadDrafts() {
-      if (!user || !firestore) {
-        setLoadingDrafts(false);
-        return;
-      }
-
-      if (profile?.role && ["owner", "writer"].includes(profile.role)) {
-        try {
-          const q = query(
-            collection(firestore, "posts"),
-            where("authorId", "==", user.uid),
-            where("status", "==", "draft"),
-            orderBy("updatedAt", "desc"),
-          );
-          const snap = await getDocs(q);
-          const draftPosts = snap.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })) as Post[];
-          setDrafts(draftPosts);
-        } catch (error) {
-          console.error("Error loading drafts:", error);
-        }
-      }
-      setLoadingDrafts(false);
-    }
-
-    if (!loading && user) {
-      loadDrafts();
-    }
-  }, [user, profile, loading]);
-
-  useEffect(() => {
-    async function loadAllDrafts() {
-      if (!user || !firestore) {
-        setLoadingAllDrafts(false);
-        return;
-      }
-
-      if (profile?.role && ["owner", "writer"].includes(profile.role)) {
-        try {
-          const allDraftPosts = await getAllDrafts();
-          // Filter out user's own drafts
-          const othersDrafts = allDraftPosts.filter(
-            (draft) => draft.authorId !== user.uid,
-          );
-          setAllDrafts(othersDrafts);
-        } catch (error) {
-          console.error("Error loading all drafts:", error);
-        }
-      }
-      setLoadingAllDrafts(false);
-    }
-
-    if (!loading && user) {
-      loadAllDrafts();
-    }
-  }, [user, profile, loading]);
-
-  useEffect(() => {
-    async function loadPublished() {
-      if (!user || !firestore) {
-        setLoadingPublished(false);
-        return;
-      }
-
-      if (profile?.role && ["owner", "writer"].includes(profile.role)) {
-        try {
-          const q = query(
-            collection(firestore, "posts"),
-            where("authorId", "==", user.uid),
-            where("status", "==", "published"),
-            orderBy("publishedAt", "desc"),
-          );
-          const snap = await getDocs(q);
-          const pubPosts = snap.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })) as Post[];
-          setPublishedPosts(pubPosts);
-        } catch (error) {
-          console.error("Error loading published posts:", error);
-        }
-      }
-      setLoadingPublished(false);
-    }
-
-    if (!loading && user) {
-      loadPublished();
-    }
-  }, [user, profile, loading]);
+  // ...existing code for allDrafts, invites, and other logic...
 
   useEffect(() => {
     async function loadInvites() {

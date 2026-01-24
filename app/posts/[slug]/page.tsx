@@ -1,5 +1,6 @@
 "use client";
 import { use, useEffect, useState } from "react";
+import { formatDate } from "../../../lib/formatDate";
 import Head from "next/head";
 import { useRouter } from "next/navigation";
 import { getPostBySlug } from "../../../lib/firebase/posts";
@@ -111,15 +112,7 @@ export default function PostDetail({
     );
   }
 
-  const formatDate = (timestamp: any) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return new Intl.DateTimeFormat("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    }).format(date);
-  };
+
 
   // Calculate read time (average 200 words/minute)
   const getReadTime = (text: string) => {
