@@ -63,14 +63,21 @@ export default function SubscribeForm() {
         );
 
   return (
-    <section className="mb-8 p-6 bg-tertiary/10 dark:bg-tertiary/20 rounded-lg shadow text-center max-w-xl mx-auto" aria-labelledby="subscribe-heading">
-      <h2 id="subscribe-heading" className="text-xl font-semibold mb-2 text-primary dark:text-tertiary">
+    <section
+      className="mb-8 p-6 bg-tertiary/10 dark:bg-tertiary/20 rounded-lg shadow text-center max-w-xl mx-auto"
+      aria-labelledby="subscribe-heading"
+    >
+      <h2
+        id="subscribe-heading"
+        className="text-xl font-semibold mb-2 text-primary dark:text-tertiary"
+      >
         Ready for more?
       </h2>
       {nextPost && (
         <p className="mb-2 text-center text-base text-gray-700 dark:text-gray-300">
-          The next article, <strong className="font-bold">{nextPost.title}</strong>,
-          drops in {daysToNextRelease === 1 ? "a day" : `${daysToNextRelease} days`}.
+          The next article,{" "}
+          <strong className="font-bold">{nextPost.title}</strong>, drops in{" "}
+          {daysToNextRelease === 1 ? "a day" : `${daysToNextRelease} days`}.
           Subscribe to updates to make sure you don't miss it!
         </p>
       )}

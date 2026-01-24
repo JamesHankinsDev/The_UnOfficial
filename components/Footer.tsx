@@ -149,8 +149,8 @@ export default function Footer() {
                     Connect
                   </Typography>
                   <Typography variant="body2" color="text.secondary" mb={2}>
-                    Real fans, real talk. Join the conversation about the game we
-                    love.
+                    Real fans, real talk. Join the conversation about the game
+                    we love.
                   </Typography>
                 </Box>
               </Box>
@@ -168,7 +168,15 @@ export default function Footer() {
               © {currentYear} The UnOfficial. All rights reserved.
             </Typography>
             <nav aria-label="Footer secondary navigation">
-              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", gap: 16 }}>
+              <ul
+                style={{
+                  listStyle: "none",
+                  padding: 0,
+                  margin: 0,
+                  display: "flex",
+                  gap: 16,
+                }}
+              >
                 <li>
                   <Link
                     href="/posts"
