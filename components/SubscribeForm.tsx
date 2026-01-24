@@ -49,15 +49,18 @@ export default function SubscribeForm() {
     }
   };
 
-  const daysToNextRelease = nextPost == null ? null : Math.floor(
-    (new Date(
-      nextPost.releaseDate?.toDate
-        ? nextPost.releaseDate.toDate()
-        : nextPost.releaseDate,
-    ).getTime() -
-      Date.now()) /
-      (1000 * 60 * 60 * 24),
-  );
+  const daysToNextRelease =
+    nextPost == null
+      ? null
+      : Math.ceil(
+          (new Date(
+            nextPost.releaseDate?.toDate
+              ? nextPost.releaseDate.toDate()
+              : nextPost.releaseDate,
+          ).getTime() -
+            Date.now()) /
+            (1000 * 60 * 60 * 24),
+        );
 
   return (
     <div className="mb-8 p-6 bg-tertiary/10 dark:bg-tertiary/20 rounded-lg shadow text-center max-w-xl mx-auto">
