@@ -206,8 +206,8 @@ export default function ShopifyBuyButton() {
   }, []);
 
   return (
-    <div className="bg-slate-200 rounded-lg shadow p-4 dark:bg-grey-900">
+    <section className="bg-slate-200 rounded-lg shadow p-4 dark:bg-grey-900" aria-label="Shopify Buy Button">
       <div id="collection-component-1768959071335" />
-    </div>
+    </section>
   );
 }

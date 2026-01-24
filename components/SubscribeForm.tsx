@@ -63,23 +63,27 @@ export default function SubscribeForm() {
         );
 
   return (
-    <div className="mb-8 p-6 bg-tertiary/10 dark:bg-tertiary/20 rounded-lg shadow text-center max-w-xl mx-auto">
-      <h3 className="text-xl font-semibold mb-2 text-primary dark:text-tertiary">
+    <section className="mb-8 p-6 bg-tertiary/10 dark:bg-tertiary/20 rounded-lg shadow text-center max-w-xl mx-auto" aria-labelledby="subscribe-heading">
+      <h2 id="subscribe-heading" className="text-xl font-semibold mb-2 text-primary dark:text-tertiary">
         Ready for more?
-      </h3>
+      </h2>
       {nextPost && (
-        <div className="mb-2 text-center text-base text-gray-700 dark:text-gray-300">
-          The next article, <span className="font-bold">{nextPost.title}</span>,
-          drops in{" "}
-          {daysToNextRelease === 1 ? "a day" : `${daysToNextRelease} days`}.
+        <p className="mb-2 text-center text-base text-gray-700 dark:text-gray-300">
+          The next article, <strong className="font-bold">{nextPost.title}</strong>,
+          drops in {daysToNextRelease === 1 ? "a day" : `${daysToNextRelease} days`}.
           Subscribe to updates to make sure you don't miss it!
-        </div>
+        </p>
       )}
       <form
         onSubmit={handleSubmit}
         className="flex flex-col sm:flex-row items-center gap-2 justify-center mt-4"
+        aria-label="Subscribe to updates"
       >
+        <label htmlFor="subscribe-email" className="sr-only">
+          Email address
+        </label>
         <input
+          id="subscribe-email"
           type="email"
           className="flex-1 px-4 py-2 rounded border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
           placeholder="Enter your email for updates"
@@ -97,6 +101,6 @@ export default function SubscribeForm() {
           {status === "loading" ? "Subscribing..." : "Subscribe"}
         </button>
       </form>
-    </div>
+    </section>
   );
 }

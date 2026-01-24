@@ -180,8 +180,8 @@ export default function PostDetail({
             ))}
           </div>
         )}
-        {/* Share button */}
-        <div className="mt-4 flex gap-2">
+        {/* Share and navigation actions */}
+        <nav className="mt-4 flex gap-2" aria-label="Post actions">
           <button
             type="button"
             className="flex items-center gap-2 px-3 py-1 bg-primary text-white rounded hover:bg-accent transition-colors text-sm"
@@ -209,10 +209,11 @@ export default function PostDetail({
             }}
             aria-label="Share this article"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 6l-4-4-4 4m4-4v16" /></svg>
-            Share
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 6l-4-4-4 4m4-4v16" /></svg>
+            <span className="sr-only">Share this article</span>
+            <span aria-hidden="true">Share</span>
           </button>
-        </div>
+        </nav>
       </header>
 
       {/* Subscribe CTA removed from top of article */}

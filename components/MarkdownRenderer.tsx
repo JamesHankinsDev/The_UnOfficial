@@ -6,13 +6,13 @@ import remarkGfm from "remark-gfm";
 
 export default function MarkdownRenderer({ content }: { content: string }) {
   return (
-    <div className="prose prose-lg dark:prose-invert prose-gray dark:prose-gray max-w-none">
+    <section className="prose prose-lg dark:prose-invert prose-gray dark:prose-gray max-w-none" aria-label="Article content">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSanitize]}
       >
         {content}
       </ReactMarkdown>
-    </div>
+    </section>
   );
 }
