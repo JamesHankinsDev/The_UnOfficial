@@ -81,6 +81,11 @@ export async function POST(request: NextRequest) {
 
     // Send emails
     if (emailSubscribers.length > 0 && process.env.RESEND_API_KEY) {
+      // Add UTM and attribution params
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const utm = `?utm_source=newsletter&utm_medium=email&utm_campaign=notify_subscribers&attribution=notify-subscribers`;
+      const postUrl = `${baseUrl}/posts/${postSlug}${utm}`;
+      const settingsUrl = `${baseUrl}/settings${utm}`;
       for (const email of emailSubscribers) {
         emailPromises.push(
           resend.emails.send({
@@ -109,13 +114,13 @@ export async function POST(request: NextRequest) {
                     <h2>${postTitle}</h2>
                     <p>By ${authorName}</p>
                     <p>A new article has been published on The UnOfficial. Check it out now!</p>
-                    <a href="${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/posts/${postSlug}" class="button">
+                    <a href="${postUrl}" class="button">
                       Read Article
                     </a>
                   </div>
                   <div class="footer">
                     <p>You're receiving this because you subscribed to notifications.</p>
-                    <p><a href="${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/settings">Manage your notification preferences</a></p>
+                    <p><a href="${settingsUrl}">Manage your notification preferences</a></p>
                   </div>
                 </div>
               </body>

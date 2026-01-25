@@ -148,7 +148,8 @@ export default function DashboardPage() {
   };
 
   const copyInviteLink = (code: string) => {
-    const link = `${window.location.origin}/signup/writer?code=${code}`;
+    // Add UTM and attribution params
+    const link = `${window.location.origin}/signup/writer?code=${code}&utm_source=invite&utm_medium=dashboard&utm_campaign=invite_writer&attribution=dashboard-invite`;
     navigator.clipboard.writeText(link);
     setCopiedCode(code);
     setTimeout(() => setCopiedCode(null), 2000);
