@@ -112,8 +112,6 @@ export default function PostDetail({
     );
   }
 
-
-
   // Calculate read time (average 200 words/minute)
   const getReadTime = (text: string) => {
     if (!text) return 1;
@@ -213,7 +211,10 @@ export default function PostDetail({
               type="button"
               className="flex items-center gap-2 px-3 py-1 bg-primary text-white rounded hover:bg-accent transition-colors text-sm"
               onClick={async () => {
-                let shareUrl = typeof window !== "undefined" ? window.location.origin + `/posts/${post.slug}` : "";
+                let shareUrl =
+                  typeof window !== "undefined"
+                    ? window.location.origin + `/posts/${post.slug}`
+                    : "";
                 // Add UTM and attribution params
                 shareUrl += `?utm_source=share&utm_medium=button&utm_campaign=share_post&attribution=share-button`;
                 const shareData = {

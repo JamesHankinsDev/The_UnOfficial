@@ -1,10 +1,18 @@
 "use client";
+import Head from "next/head";
 import Logo from "../../components/Logo";
 // import ContactForm from "../../components/ContactForm";
 
 export default function AboutPage() {
   return (
     <>
+      <Head>
+        <title>About | The UnOfficial</title>
+        <meta
+          name="description"
+          content="Learn about The UnOfficial, our story, and our mission to bring NBA fans together for unfiltered basketball conversation."
+        />
+      </Head>
       <div className="max-w-4xl mx-auto">
         <div className="bg-primary.main dark:bg-gray-800 rounded-lg shadow-lg p-8 md:p-12">
           {/* Header with Logo */}

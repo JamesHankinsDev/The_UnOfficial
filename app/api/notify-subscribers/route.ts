@@ -82,7 +82,8 @@ export async function POST(request: NextRequest) {
     // Send emails
     if (emailSubscribers.length > 0 && process.env.RESEND_API_KEY) {
       // Add UTM and attribution params
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const baseUrl =
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
       const utm = `?utm_source=newsletter&utm_medium=email&utm_campaign=notify_subscribers&attribution=notify-subscribers`;
       const postUrl = `${baseUrl}/posts/${postSlug}${utm}`;
       const settingsUrl = `${baseUrl}/settings${utm}`;

@@ -48,29 +48,40 @@ import {
   getInviteCodes,
   type InviteCode,
 } from "../../lib/firebase/invites";
+import { orderBy, query, where } from "firebase/firestore";
+import { firestore } from "../../lib/firebase/client";
 
 export default function DashboardPage() {
   const { user, profile, loading, signOut } = useAuth();
   const router = useRouter();
   // Fetch published posts for this user
-  const { posts: publishedPosts, loading: loadingPublished } = usePosts({
+  const { posts: publishedPostsData, loading: loadingPublished } = usePosts({
     status: "published",
     orderByField: "publishedAt",
     orderDirection: "desc",
     filterFutureRelease: false,
   });
   // Fetch drafts for this user
-  const { posts: drafts, loading: loadingDrafts } = usePosts({
+  const { posts: draftsData, loading: loadingDrafts } = usePosts({
     status: "draft",
     orderByField: "updatedAt",
     orderDirection: "desc",
     filterFutureRelease: false,
   });
+
+  // Local state for posts to allow updates after unpublishing
+  const [publishedPosts, setPublishedPosts] = useState(publishedPostsData);
+  const [drafts, setDrafts] = useState(draftsData);
+
+  // Keep local state in sync with fetched data
+  useEffect(() => {
+    setPublishedPosts(publishedPostsData);
+  }, [publishedPostsData]);
+  useEffect(() => {
+    setDrafts(draftsData);
+  }, [draftsData]);
   // Team drafts: all drafts not authored by the current user
-  const {
-    posts: allDrafts,
-    loading: loadingAllDrafts,
-  } = usePosts({
+  const { posts: allDrafts, loading: loadingAllDrafts } = usePosts({
     status: "draft",
     orderByField: "updatedAt",
     orderDirection: "desc",
@@ -82,7 +93,7 @@ export default function DashboardPage() {
         where("status", "==", "draft"),
         where("authorId", "!=", user.uid),
         orderBy("authorId"),
-        orderBy("updatedAt", "desc")
+        orderBy("updatedAt", "desc"),
       );
     },
   });
@@ -171,8 +182,8 @@ export default function DashboardPage() {
       // Move post from published to drafts in state
       const post = publishedPosts.find((p) => p.id === postId);
       if (post) {
-        setPublishedPosts(publishedPosts.filter((p) => p.id !== postId));
-        setDrafts([{ ...post, status: "draft" }, ...drafts]);
+        setPublishedPosts((prev) => prev.filter((p) => p.id !== postId));
+        setDrafts((prev) => [{ ...post, status: "draft" }, ...prev]);
       }
     } catch (error) {
       console.error("Error unpublishing post:", error);
