@@ -1,7 +1,8 @@
 "use client";
 import Head from "next/head";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePosts } from "../lib/usePosts";
+import Spinner from "../components/Spinner";
 import PostCard from "../components/PostCard";
 import SubscribeForm from "../components/SubscribeForm";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -29,7 +30,13 @@ type Post = {
 
 export default function Home() {
   SwiperCore.use([Autoplay]);
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
   const { posts, loading } = usePosts();
   // 0 = What's New, 1 = What's on the way
   const [openSection, setOpenSection] = useState<0 | 1>(0);
@@ -208,7 +215,7 @@ export default function Home() {
           <SubscribeForm />
         </div>
         {loading ? (
-          <p>Loading...</p>
+          <div className="flex justify-center py-12"><Spinner /></div>
         ) : (
           <>
             {whatsNew.length > 0 && (

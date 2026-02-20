@@ -16,6 +16,7 @@ import {
 } from "../../../../lib/firebase/storage";
 import type { Post } from "../../../../lib/firebase/posts";
 import { slugify } from "../../../../lib/utils";
+import Spinner from "../../../../components/Spinner";
 
 export default function EditPostPage() {
   const { user, profile, loading } = useAuth();
@@ -272,7 +273,7 @@ export default function EditPostPage() {
   if (loading || loadingPost) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        <Spinner />
       </div>
     );
   }

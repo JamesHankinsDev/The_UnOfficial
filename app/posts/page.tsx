@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { usePosts } from "../../lib/usePosts";
 import PostCard from "../../components/PostCard";
 import Head from "next/head";
+import Spinner from "../../components/Spinner";
 
 export default function PostsPage() {
   const { posts, loading } = usePosts();
@@ -95,7 +96,7 @@ export default function PostsPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <p className="text-gray-600 dark:text-gray-400">Loading posts...</p>
+            <Spinner />
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12">

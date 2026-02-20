@@ -9,6 +9,7 @@ import type { Post } from "../../../lib/firebase/posts";
 import { getNextScheduledPost } from "../../../lib/firebase/nextPost";
 import MarkdownRenderer from "../../../components/MarkdownRenderer";
 import SubscribeForm from "../../../components/SubscribeForm";
+import Spinner from "../../../components/Spinner";
 import toast from "react-hot-toast";
 
 export default function PostDetail({
@@ -69,7 +70,7 @@ export default function PostDetail({
           <meta name="robots" content="noindex" />
         </Head>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <p className="text-gray-600 dark:text-gray-400">Loading post...</p>
+          <Spinner />
         </div>
       </>
     );

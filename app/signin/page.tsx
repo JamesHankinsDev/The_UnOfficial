@@ -4,6 +4,7 @@ import { useAuth } from "../../components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Spinner from "../../components/Spinner";
 
 export default function SignInPage() {
   const { user, loading, signInWithGoogle } = useAuth();
@@ -37,7 +38,7 @@ export default function SignInPage() {
         />
       </Head>
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        <Spinner />
       </div>
     </>
   ) : (

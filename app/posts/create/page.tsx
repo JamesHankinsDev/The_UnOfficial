@@ -6,6 +6,7 @@ import { useSnackbar } from "../../../components/MuiSnackbar";
 import { createPost } from "../../../lib/firebase/posts";
 import { uploadPostAudio } from "../../../lib/firebase/storage";
 import { slugify } from "../../../lib/utils";
+import Spinner from "../../../components/Spinner";
 
 export default function CreatePostPage() {
   const { user, profile, loading } = useAuth();
@@ -135,7 +136,7 @@ export default function CreatePostPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        <Spinner />
       </div>
     );
   }
