@@ -1,11 +1,11 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // Allow write (upload) only for authenticated users with role writer or admin
+    // Allow write (upload) only for authenticated users with role owner or writer
     match /{allPaths=**} {
       allow read: if true; // public read for hosted images
       allow write: if request.auth != null &&
-        (get(/databases/(default)/documents/users/$(request.auth.uid)).data.role in ['admin','writer']);
+        (get(/databases/(default)/documents/users/$(request.auth.uid)).data.role in ['owner','writer']);
     }
   }
 }

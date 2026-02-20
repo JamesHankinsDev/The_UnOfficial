@@ -1,6 +1,6 @@
 "use client";
 import { ThemeProvider, CssBaseline } from "@mui/material";
-import muiTheme from "../lib/muiTheme";
+import { lightTheme } from "../lib/muiThemes";
 
 export default function MuiAppProvider({
   children,
@@ -8,7 +8,7 @@ export default function MuiAppProvider({
   children: React.ReactNode;
 }) {
   return (
-    <ThemeProvider theme={muiTheme}>
+    <ThemeProvider theme={lightTheme}>
       <CssBaseline />
       {children}
     </ThemeProvider>

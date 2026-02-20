@@ -1,27 +1,14 @@
 import Link from "next/link";
+import { formatDate } from "@/lib/formatDate";
+import { estimateReadingTime } from "@/lib/utils";
 
 export default function PostCard({ post }: { post: any }) {
-  const formatDate = (timestamp: any) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }).format(date);
-  };
-  // Read time (200 wpm)
-  const getReadTime = (text: string) => {
-    if (!text) return 1;
-    const words = text.trim().split(/\s+/).length;
-    return Math.max(1, Math.round(words / 200));
-  };
   // Listen time (audioDuration in seconds)
   const getListenTime = (audioDuration?: number | null) => {
     if (!audioDuration) return null;
     return Math.max(1, Math.round(audioDuration / 60));
   };
-  const readTime = getReadTime(post.content || "");
+  const readTime = estimateReadingTime(post.content || "");
   const listenTime = getListenTime(post.audioDuration);
 
   return (
@@ -40,7 +27,7 @@ export default function PostCard({ post }: { post: any }) {
           </div>
           {post.publishedAt && (
             <time className="text-gray-800 dark:text-gray-500">
-              {formatDate(post.publishedAt)}
+              {formatDate(post.publishedAt, { month: "short", day: "numeric", year: "numeric" })}
             </time>
           )}
         </div>

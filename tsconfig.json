@@ -17,6 +17,10 @@
     "noEmit": true,
     "esModuleInterop": true,
     "incremental": true,
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "types": ["jest", "@testing-library/jest-dom"],
     "plugins": [
       {
         "name": "next"

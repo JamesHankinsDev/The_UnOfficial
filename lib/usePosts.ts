@@ -90,7 +90,5 @@ export function usePosts(options: UsePostsOptions = {}) {
     customQueryBuilder,
   ]);
 
-  console.log("posts from usePosts:", posts);
-
   return { posts, loading, error };
 }

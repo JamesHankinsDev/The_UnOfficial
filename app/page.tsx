@@ -71,8 +71,6 @@ export default function Home() {
       return bDate.valueOf() - aDate.valueOf();
     });
 
-  console.log("Posts: ", posts);
-
   // What's to come: releaseDate in the future and not already published
   const whatsOnTheWay = posts
     .filter((p: any) => {
@@ -121,8 +119,6 @@ export default function Home() {
       }
       return aDate.valueOf() - bDate.valueOf();
     });
-
-  console.log("Whats on the way", whatsOnTheWay);
 
   // Remove posts that are already in 'What's New' or 'What's on the way' from the main list
   const whatsNewIds = new Set(whatsNew.map((p) => p.id));

@@ -1,6 +1,7 @@
 "use client";
 import { use, useEffect, useState } from "react";
 import { formatDate } from "../../../lib/formatDate";
+import { estimateReadingTime } from "../../../lib/utils";
 import Head from "next/head";
 import { useRouter } from "next/navigation";
 import { getPostBySlug } from "../../../lib/firebase/posts";
@@ -112,19 +113,13 @@ export default function PostDetail({
     );
   }
 
-  // Calculate read time (average 200 words/minute)
-  const getReadTime = (text: string) => {
-    if (!text) return 1;
-    const words = text.trim().split(/\s+/).length;
-    return Math.max(1, Math.round(words / 200));
-  };
   // Listen time: try to get from post.audioDuration (in seconds), else null
   const getListenTime = (audioDuration?: number | null) => {
     if (!audioDuration) return null;
     return Math.max(1, Math.round(audioDuration / 60));
   };
 
-  const readTime = getReadTime(post.content || "");
+  const readTime = estimateReadingTime(post.content || "");
   const listenTime = getListenTime(post.audioDuration);
 
   return (

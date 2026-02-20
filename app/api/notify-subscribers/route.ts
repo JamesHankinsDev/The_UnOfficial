@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import twilio from "twilio";
 import { firestore } from "../../../lib/firebase/client";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const twilioClient =
-  process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN
-    ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
-    : null;
 
 /**
  * Notification API Route
@@ -62,22 +57,6 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // (Optional) If you want to support SMS, add phoneNumber to subscriber doc and query here
-    // const smsQuery = query(
-    //   subscribersRef,
-    //   where("subscribed", "==", true),
-    //   where("phoneNumber", "!=", null)
-    // );
-    // const smsSnapshot = await getDocs(smsQuery);
-    // const smsSubscribers: string[] = [];
-    // smsSnapshot.forEach((doc) => {
-    //   const subscriberData = doc.data();
-    //   if (subscriberData.phoneNumber) {
-    //     smsSubscribers.push(subscriberData.phoneNumber);
-    //   }
-    // });
-    const smsSubscribers: string[] = []; // Remove if not supporting SMS
-    const smsPromises: Promise<any>[] = []; // Remove if not supporting SMS
 
     // Send emails
     if (emailSubscribers.length > 0 && process.env.RESEND_API_KEY) {
@@ -132,28 +111,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // (Optional) Send SMS messages if supporting phone numbers in subscribers
-    // if (
-    //   smsSubscribers.length > 0 &&
-    //   twilioClient &&
-    //   process.env.TWILIO_PHONE_NUMBER
-    // ) {
-    //   for (const phoneNumber of smsSubscribers) {
-    //     smsPromises.push(
-    //       twilioClient.messages.create({
-    //         body: `📰 New article published on The UnOfficial: "${postTitle}" by ${authorName}. Read now: ${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/posts/${postSlug}`,
-    //         from: process.env.TWILIO_PHONE_NUMBER,
-    //         to: phoneNumber,
-    //       }),
-    //     );
-    //   }
-    // }
-
-    // Wait for all notifications to be sent
-    const [emailResults, smsResults] = await Promise.all([
-      Promise.allSettled(emailPromises),
-      Promise.allSettled(smsPromises),
-    ]);
+    // Wait for all email notifications to be sent
+    const emailResults = await Promise.allSettled(emailPromises);
 
     const emailSuccessful = emailResults.filter(
       (r) => r.status === "fulfilled",
@@ -161,10 +120,6 @@ export async function POST(request: NextRequest) {
     const emailFailed = emailResults.filter(
       (r) => r.status === "rejected",
     ).length;
-    const smsSuccessful = smsResults.filter(
-      (r) => r.status === "fulfilled",
-    ).length;
-    const smsFailed = smsResults.filter((r) => r.status === "rejected").length;
 
     return NextResponse.json({
       message: "Notifications sent",
@@ -172,11 +127,6 @@ export async function POST(request: NextRequest) {
         successful: emailSuccessful,
         failed: emailFailed,
         total: emailSubscribers.length,
-      },
-      sms: {
-        successful: smsSuccessful,
-        failed: smsFailed,
-        total: smsSubscribers.length,
       },
     });
   } catch (error) {

@@ -1,9 +1,9 @@
 "use client";
 import { useAuth } from "../../components/AuthProvider";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePosts } from "../../lib/usePosts";
-import { updatePost, getAllDrafts } from "../../lib/firebase/posts";
+import { updatePost } from "../../lib/firebase/posts";
 import toast from "react-hot-toast";
 // Helper to check if a post is eligible for notification
 import type { Post } from "../../lib/firebase/posts";
@@ -48,25 +48,64 @@ import {
   getInviteCodes,
   type InviteCode,
 } from "../../lib/firebase/invites";
-import { orderBy, query, where } from "firebase/firestore";
+import { CollectionReference, DocumentData, orderBy, query, where } from "firebase/firestore";
 import { firestore } from "../../lib/firebase/client";
+import { formatDate } from "../../lib/formatDate";
 
 export default function DashboardPage() {
   const { user, profile, loading, signOut } = useAuth();
   const router = useRouter();
-  // Fetch published posts for this user
+
+  // Memoized query builders — stable references prevent infinite re-fetch loops
+  const myPublishedQueryBuilder = useCallback(
+    (colRef: CollectionReference<DocumentData, DocumentData>) => {
+      if (!user) return query(colRef, where("status", "==", "published"));
+      return query(
+        colRef,
+        where("status", "==", "published"),
+        where("authorId", "==", user.uid),
+        orderBy("publishedAt", "desc"),
+      );
+    },
+    [user],
+  );
+
+  const myDraftsQueryBuilder = useCallback(
+    (colRef: CollectionReference<DocumentData, DocumentData>) => {
+      if (!user) return query(colRef, where("status", "==", "draft"));
+      return query(
+        colRef,
+        where("status", "==", "draft"),
+        where("authorId", "==", user.uid),
+        orderBy("updatedAt", "desc"),
+      );
+    },
+    [user],
+  );
+
+  const teamDraftsQueryBuilder = useCallback(
+    (colRef: CollectionReference<DocumentData, DocumentData>) => {
+      if (!user) return query(colRef, where("status", "==", "draft"));
+      return query(
+        colRef,
+        where("status", "==", "draft"),
+        where("authorId", "!=", user.uid),
+        orderBy("authorId"),
+        orderBy("updatedAt", "desc"),
+      );
+    },
+    [user],
+  );
+
+  // Fetch this user's published posts
   const { posts: publishedPostsData, loading: loadingPublished } = usePosts({
-    status: "published",
-    orderByField: "publishedAt",
-    orderDirection: "desc",
     filterFutureRelease: false,
+    customQueryBuilder: myPublishedQueryBuilder,
   });
-  // Fetch drafts for this user
+  // Fetch this user's drafts
   const { posts: draftsData, loading: loadingDrafts } = usePosts({
-    status: "draft",
-    orderByField: "updatedAt",
-    orderDirection: "desc",
     filterFutureRelease: false,
+    customQueryBuilder: myDraftsQueryBuilder,
   });
 
   // Local state for posts to allow updates after unpublishing
@@ -82,20 +121,8 @@ export default function DashboardPage() {
   }, [draftsData]);
   // Team drafts: all drafts not authored by the current user
   const { posts: allDrafts, loading: loadingAllDrafts } = usePosts({
-    status: "draft",
-    orderByField: "updatedAt",
-    orderDirection: "desc",
     filterFutureRelease: false,
-    customQueryBuilder: (colRef) => {
-      if (!user) return query(colRef, where("status", "==", "draft"));
-      return query(
-        colRef,
-        where("status", "==", "draft"),
-        where("authorId", "!=", user.uid),
-        orderBy("authorId"),
-        orderBy("updatedAt", "desc"),
-      );
-    },
+    customQueryBuilder: teamDraftsQueryBuilder,
   });
   const [unpublishing, setUnpublishing] = useState<string | null>(null);
   const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([]);
@@ -353,9 +380,7 @@ export default function DashboardPage() {
                           )}
                           <span>
                             Updated:{" "}
-                            {new Date(
-                              draft.updatedAt?.seconds * 1000 || Date.now(),
-                            ).toLocaleDateString()}
+                            {formatDate(draft.updatedAt)}
                           </span>
                         </div>
                       </div>
@@ -420,9 +445,7 @@ export default function DashboardPage() {
                           )}
                           <span>
                             Updated:{" "}
-                            {new Date(
-                              draft.updatedAt?.seconds * 1000 || Date.now(),
-                            ).toLocaleDateString()}
+                            {formatDate(draft.updatedAt)}
                           </span>
                         </div>
                       </div>
@@ -492,9 +515,7 @@ export default function DashboardPage() {
                           )}
                           <span>
                             Published:{" "}
-                            {new Date(
-                              post.publishedAt?.seconds * 1000 || Date.now(),
-                            ).toLocaleDateString()}
+                            {formatDate(post.publishedAt)}
                           </span>
                         </div>
                       </div>
@@ -607,18 +628,12 @@ export default function DashboardPage() {
                                 {invite.usedByName}
                               </span>{" "}
                               on{" "}
-                              {invite.usedAt &&
-                                new Date(
-                                  invite.usedAt.seconds * 1000,
-                                ).toLocaleDateString()}
+                              {formatDate(invite.usedAt)}
                             </p>
                           ) : (
                             <p>
                               Created{" "}
-                              {invite.createdAt &&
-                                new Date(
-                                  invite.createdAt.seconds * 1000,
-                                ).toLocaleDateString()}
+                              {formatDate(invite.createdAt)}
                             </p>
                           )}
                         </div>
