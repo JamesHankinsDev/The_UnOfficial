@@ -300,11 +300,9 @@ export default function PostDetail({
         </div>
 
         <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-          {nextPost ? (
-            <div className="mt-4 flex justify-center">
-              <SubscribeForm />
-            </div>
-          ) : null}
+          <div className="mt-4 flex justify-center">
+            <SubscribeForm />
+          </div>
           <a
             href="/posts"
             className="text-primary dark:text-tertiary hover:text-accent transition-colors inline-flex items-center gap-2"

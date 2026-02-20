@@ -306,7 +306,11 @@ export default function CreatePostPage() {
             <div className="flex gap-3">
               <button
                 type="button"
-                onClick={() => router.push("/dashboard")}
+                onClick={() => {
+                  const hasContent = formData.title || formData.content || formData.excerpt;
+                  if (hasContent && !window.confirm("You have unsaved changes. Leave without saving?")) return;
+                  router.push("/dashboard");
+                }}
                 className="px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 Cancel

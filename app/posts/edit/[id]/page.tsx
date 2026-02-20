@@ -535,14 +535,6 @@ export default function EditPostPage() {
                   Publish
                 </span>
               </label>
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={deleting}
-                className="ml-4 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 disabled:opacity-50"
-              >
-                {deleting ? "Deleting..." : "Delete Post"}
-              </button>
             </div>
 
             <div className="flex gap-3">
@@ -561,6 +553,17 @@ export default function EditPostPage() {
                 {saving ? "Saving..." : "Save Changes"}
               </button>
             </div>
+          </div>
+
+          <div className="pt-4 mt-2 border-t border-red-100 dark:border-red-900/30 flex justify-end">
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting}
+              className="px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {deleting ? "Deleting..." : "Delete Post"}
+            </button>
           </div>
         </form>
       </div>

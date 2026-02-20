@@ -249,7 +249,7 @@ export default function Home() {
                         1024: { slidesPerView: 2 },
                         1280: { slidesPerView: 2 },
                       }}
-                      autoplay={{ delay: 1500, disableOnInteraction: false }}
+                      autoplay={{ delay: 5000, disableOnInteraction: true, pauseOnMouseEnter: true }}
                       direction="horizontal"
                       loop={true}
                       modules={[Autoplay]}

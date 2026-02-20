@@ -125,6 +125,7 @@ export default function DashboardPage() {
     customQueryBuilder: teamDraftsQueryBuilder,
   });
   const [unpublishing, setUnpublishing] = useState<string | null>(null);
+  const [notifying, setNotifying] = useState<string | null>(null);
   const [inviteCodes, setInviteCodes] = useState<InviteCode[]>([]);
   const [loadingInvites, setLoadingInvites] = useState(false);
   const [generatingCode, setGeneratingCode] = useState(false);
@@ -541,10 +542,15 @@ export default function DashboardPage() {
                         </button>
                         {canNotify(post) && (
                           <button
-                            onClick={() => notifySubscribers(post)}
-                            className="flex-1 sm:flex-none px-3 py-1 text-sm bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors whitespace-nowrap"
+                            onClick={async () => {
+                              setNotifying(post.id!);
+                              await notifySubscribers(post);
+                              setNotifying(null);
+                            }}
+                            disabled={!!notifying}
+                            className="flex-1 sm:flex-none px-3 py-1 text-sm bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                           >
-                            Notify Subscribers
+                            {notifying === post.id ? "Notifying..." : "Notify Subscribers"}
                           </button>
                         )}
                       </div>
