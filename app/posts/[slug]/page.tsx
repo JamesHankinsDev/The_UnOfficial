@@ -9,6 +9,7 @@ import type { Post } from "../../../lib/firebase/posts";
 import { getNextScheduledPost } from "../../../lib/firebase/nextPost";
 import MarkdownRenderer from "../../../components/MarkdownRenderer";
 import SubscribeForm from "../../../components/SubscribeForm";
+import toast from "react-hot-toast";
 
 export default function PostDetail({
   params,
@@ -224,12 +225,12 @@ export default function PostDetail({
                 } else if (navigator.clipboard) {
                   try {
                     await navigator.clipboard.writeText(shareUrl);
-                    alert("Link copied to clipboard!");
+                    toast.success("Link copied to clipboard!");
                   } catch {
-                    alert("Failed to copy link.");
+                    toast.error("Failed to copy link.");
                   }
                 } else {
-                  alert("Sharing not supported on this device.");
+                  toast.error("Sharing not supported on this device.");
                 }
               }}
               aria-label="Share this article"
@@ -266,7 +267,7 @@ export default function PostDetail({
         {post.coverImage && (
           <img
             src={post.coverImage}
-            alt="cover"
+            alt={post.title}
             className="w-full rounded-lg mb-8 shadow-lg"
           />
         )}

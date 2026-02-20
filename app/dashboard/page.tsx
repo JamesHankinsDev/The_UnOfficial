@@ -174,13 +174,10 @@ export default function DashboardPage() {
       // Reload invite codes
       const codes = await getInviteCodes(user.uid);
       setInviteCodes(codes);
-
-      // Show success message
-      setCopiedCode(code);
-      setTimeout(() => setCopiedCode(null), 3000);
+      toast.success("Invite code generated! Click Copy Link to share it.");
     } catch (error) {
       console.error("Error generating invite code:", error);
-      alert("Failed to generate invite code");
+      toast.error("Failed to generate invite code.");
     } finally {
       setGeneratingCode(false);
     }

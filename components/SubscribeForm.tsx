@@ -6,7 +6,7 @@ import { getNextScheduledPost } from "../lib/firebase/nextPost";
 
 export default function SubscribeForm() {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "subscribed">("idle");
   const [nextPost, setNextPost] = useState<any | null>(null);
 
   useEffect(() => {
@@ -37,12 +37,11 @@ export default function SubscribeForm() {
       });
       const data = await res.json();
       if (res.ok) {
-        toast.success("You're subscribed! Check your inbox.");
-        setEmail("");
+        setStatus("subscribed");
       } else {
         toast.error(data.error || "Subscription failed. Try again.");
+        setStatus("idle");
       }
-      setStatus("idle");
     } catch {
       toast.error("Network error. Please try again.");
       setStatus("idle");
@@ -81,33 +80,43 @@ export default function SubscribeForm() {
           Subscribe to updates to make sure you don't miss it!
         </p>
       )}
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col sm:flex-row items-center gap-2 justify-center mt-4"
-        aria-label="Subscribe to updates"
-      >
-        <label htmlFor="subscribe-email" className="sr-only">
-          Email address
-        </label>
-        <input
-          id="subscribe-email"
-          type="email"
-          className="flex-1 px-4 py-2 rounded border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
-          placeholder="Enter your email for updates"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          disabled={status === "loading"}
-          aria-label="Email address"
-        />
-        <button
-          type="submit"
-          className="px-6 py-2 bg-primary text-white rounded font-semibold disabled:opacity-60"
-          disabled={status === "loading"}
+      {status === "subscribed" ? (
+        <div className="mt-4 flex flex-col items-center gap-1" role="status">
+          <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <p className="font-semibold text-green-700 dark:text-green-400">You're subscribed!</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Check your inbox for a confirmation.</p>
+        </div>
+      ) : (
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col sm:flex-row items-center gap-2 justify-center mt-4"
+          aria-label="Subscribe to updates"
         >
-          {status === "loading" ? "Subscribing..." : "Subscribe"}
-        </button>
-      </form>
+          <label htmlFor="subscribe-email" className="sr-only">
+            Email address
+          </label>
+          <input
+            id="subscribe-email"
+            type="email"
+            className="flex-1 px-4 py-2 rounded border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="Enter your email for updates"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={status === "loading"}
+            aria-label="Email address"
+          />
+          <button
+            type="submit"
+            className="px-6 py-2 bg-primary text-white rounded font-semibold disabled:opacity-60"
+            disabled={status === "loading"}
+          >
+            {status === "loading" ? "Subscribing..." : "Subscribe"}
+          </button>
+        </form>
+      )}
     </section>
   );
 }

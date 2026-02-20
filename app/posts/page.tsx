@@ -99,9 +99,17 @@ export default function PostsPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
               No posts found matching your criteria.
             </p>
+            {(search || selectedTag) && (
+              <button
+                onClick={() => { setSearch(""); setSelectedTag(null); }}
+                className="px-4 py-2 text-sm bg-tertiary text-primary rounded-lg hover:bg-accent transition-colors font-medium"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-2">

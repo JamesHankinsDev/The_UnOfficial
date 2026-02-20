@@ -1,6 +1,7 @@
 "use client";
 import { useAuth } from "./AuthProvider";
 import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Logo from "./Logo";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
@@ -13,6 +14,7 @@ import Link from "next/link";
 export default function NavBar() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleSignOut = async () => {
     await signOut();
@@ -33,30 +35,32 @@ export default function NavBar() {
           </Link>
         </Box>
         <Box display="flex" alignItems="center" gap={2}>
-          <Button
-            component={Link}
-            href="/posts"
-            color="inherit"
-            sx={{ textTransform: "none" }}
-          >
-            Posts
-          </Button>
-          <Button
-            component={Link}
-            href="/about"
-            color="inherit"
-            sx={{ textTransform: "none" }}
-          >
-            About
-          </Button>
-          <Button
-            component={Link}
-            href="/merch"
-            color="inherit"
-            sx={{ textTransform: "none" }}
-          >
-            Merch
-          </Button>
+          {[
+            { href: "/posts", label: "Posts" },
+            { href: "/about", label: "About" },
+            { href: "/merch", label: "Merch" },
+          ].map(({ href, label }) => {
+            const active = pathname === href || pathname.startsWith(href + "/");
+            return (
+              <Button
+                key={href}
+                component={Link}
+                href={href}
+                color="inherit"
+                aria-current={active ? "page" : undefined}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: active ? 700 : 400,
+                  borderBottom: active ? "2px solid" : "2px solid transparent",
+                  borderColor: active ? "success.main" : "transparent",
+                  borderRadius: 0,
+                  pb: "2px",
+                }}
+              >
+                {label}
+              </Button>
+            );
+          })}
           {!loading &&
             (user ? (
               <Button
